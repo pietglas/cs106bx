@@ -1,22 +1,23 @@
 #pragma once
 
-#include <array>
-
-using arr = std::array;
+#include <vector>
+using StateVec = std::vector<std::vector<unsigned int>>;
 
 class GameOfLife {
  public:
- 	GameOfLife(const int rows, const int cols,
-             const std::string& file_name);
+ 	GameOfLife();
+    GameOfLife(int rows, int cols, StateVec initial_state);
 
-    arr<arr<int, cols_>, rows_> state() const {return state_;}
+    bool ReadInitialState(const std::string& file_name);
+
+    StateVec state() const {return state_;}
 
     void PrintState() const;
 
  	void NextState();
 
  private:
- 	const int rows_;
- 	const int cols_;
- 	arr<arr<int, cols_>, rows_> state_;
-}
+ 	int rows_;
+ 	int cols_;
+ 	StateVec state_;
+};
