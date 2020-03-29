@@ -1,20 +1,25 @@
 #pragma once
 
 #include <vector>
-using StateVec = std::vector<std::vector<unsigned int>>;
+using StateVec = std::vector<unsigned int>;
 
 class GameOfLife {
  public:
- 	GameOfLife();
-    GameOfLife(int rows, int cols, StateVec initial_state);
+  GameOfLife();
+  GameOfLife(int rows, int cols);
+  GameOfLife(int rows, int cols, StateVec initial_state);
 
-    bool ReadInitialState(const std::string& file_name);
+  bool ReadInitialState(const std::string& file_name);
 
-    StateVec state() const {return state_;}
+  // getters
+  int rows() const {return rows_;}
+  int cols() const {return cols_;}
+  unsigned int& at(const int& row, const int& col) {return state_[row*cols_ + col];}
+  StateVec state() const {return state_;}
 
-    void PrintState() const;
+  void PrintState() const;
 
- 	void NextState();
+	void NextState();
 
  private:
  	int rows_;
