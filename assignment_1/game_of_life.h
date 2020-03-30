@@ -5,10 +5,7 @@ using StateVec = std::vector<unsigned int>;
 
 class GameOfLife {
  public:
-  GameOfLife();
-  GameOfLife(int rows, int cols);
-  GameOfLife(int rows, int cols, StateVec initial_state);
-
+  GameOfLife(bool simple_game=false);
   bool ReadInitialState(const std::string& file_name);
 
   // getters
@@ -17,12 +14,12 @@ class GameOfLife {
   unsigned int& at(const int& row, const int& col) {return state_[row*cols_ + col];}
   StateVec state() const {return state_;}
 
-  void PrintState() const;
-
-	void NextState();
+	// 'gameplay' members
+	void NextState();		
 
  private:
- 	int rows_;
- 	int cols_;
+ 	int rows_ = 0;
+ 	int cols_ = 0;
+ 	bool simple_game_ = false;	// cells can age in the default state
  	StateVec state_;
 };

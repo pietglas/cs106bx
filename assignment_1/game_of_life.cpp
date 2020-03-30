@@ -13,12 +13,7 @@
 using GOL = GameOfLife;
 using StateVec = std::vector<unsigned int>;
 
-GOL::GameOfLife() {}
-GOL::GameOfLife(int rows, int cols): rows_{rows}, cols_{cols} {
-  state_.resize(rows * cols, 0);
-}
-GOL::GameOfLife(int rows, int cols, StateVec initial_state):
-                rows_{rows}, cols_{cols}, state_{initial_state} {}
+GOL::GameOfLife(bool simple_game): simple_game_{simple_game} {}
 
 // Read the initial state of the game from a text file
 bool GOL::ReadInitialState(const std::string& file_name) {
@@ -40,16 +35,6 @@ bool GOL::ReadInitialState(const std::string& file_name) {
     succes = false;
   }
   return succes;
-}
-
-// print the current state
-void GOL::PrintState() const {
-  for (int row = 0; row != rows_; row++) {
-    for (int col = 0; col != cols_; col++) {
-      std::cout << state_[row*cols_ + col] << " ";
-    }
-    std::cout << "" << std::endl;
-  }
 }
 
 // calculate the next state, according to the game rules
@@ -75,13 +60,26 @@ void GOL::NextState() {
 				}
 			}
 			// set new entry according to game rules
-			if (ctr == 2 && state_[row*cols_ + col] != 0) 
-        new_state[row*cols_ + col] = state_[row*cols_ + col] + 1;
-			else if (ctr == 3) 
-        new_state[row*cols_ + col] = state_[row*cols_ + col] + 1;
-			else 
-        new_state[row*cols_ + col] = 0;
+      if (simple_game_ == false) {
+			  if (ctr == 2 && state_[row*cols_ + col] != 0) 
+          new_state[row*cols_ + col] = state_[row*cols_ + col] + 1;
+			  else if (ctr == 3) 
+          new_state[row*cols_ + col] = state_[row*cols_ + col] + 1;
+			  else 
+          new_state[row*cols_ + col] = 0;
+      }
+      
+      // set the scenario where cells don't age
+      else {
+        if (ctr == 2 && state_[row*cols_ + col] != 0) 
+          new_state[row*cols_ + col] = 1;
+        else if (ctr == 3) 
+          new_state[row*cols_ + col] = 1;
+        else 
+          new_state[row*cols_ + col] = 0;
+      }
 		}
 	}
 	state_ = new_state;
 }
+

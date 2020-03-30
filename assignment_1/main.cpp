@@ -7,12 +7,26 @@
 using StateVec = std::vector<unsigned int>;
 
 int main() {
-  // Create the game
-  GameOfLife gol;
+  // Create the game, check whether correct values are entered
+  cout << "Welcome to the game of life!" << endl;
+  bool simple_game = false;
+  cout << "Should cells age in this game? (1/0)" << endl;
+  while (!(cin >> simple_game)) {
+    cin.clear();
+    cin.ignore();
+    cin >> simple_game;
+  }
+  GameOfLife gol{simple_game};
   std::string text_file;
+  cout << "Enter the path to the file from which to read the initial state" << endl;
   cin >> text_file;
-  if (!gol.ReadInitialState(text_file))
-    return -1;
+  while (!gol.ReadInitialState(text_file)) {
+    cout << "File not found, reenter the path" << endl;
+    cin.clear();
+    cin.ignore();
+    cin >> text_file;
+    gol.ReadInitialState(text_file);
+  }
 
   // get the initial state to fill in the grid
   StateVec initial_state = gol.state();
@@ -22,32 +36,40 @@ int main() {
 
   // create the grid
   Grid grid;
-  //std::vector<Grid> grids{grid0, grid1, grid2, grid3, grid4};
   string image = "/home/piet/Projects/cs106bx/assignment_1/data/tileset2.ascii.png";
   unsigned int ctr = 0;
   if (!grid.load(image, 
     sf::Vector2u(32, 32), initial_state, gol.rows(), gol.cols()))
     return -1;
 
+  sf::Clock clock;
+
   // run the main loop
   while (window.isOpen())
   {
+    // check the time
+    sf::Time elapsed = clock.getElapsedTime();
+
+    // if time > 2, go to the next state
+    if (elapsed.asSeconds() > 2) {
+      gol.NextState();
+      
+      if (!grid.load(image, 
+          sf::Vector2u(32, 32), gol.state(), gol.rows(), gol.cols()))
+        return -1;
+      clock.restart();  
+    }
+
     // handle events
     sf::Event event;
     while (window.pollEvent(event))
     {
       if(event.type == sf::Event::Closed)
         window.close();
-      else if (event.type == sf::Event::KeyPressed) {
-        ctr += 1;
+      
+      // go to next state if a key is pressed
+      else if (event.type == sf::Event::KeyPressed) {   
         gol.NextState();
-        // we cannot deal with entries higher than 1 yet
-        for (int i = 0; i != gol.rows() * gol.cols(); i ++) {
-          if (gol.state()[i] == 2) {
-            unsigned int one = 1;
-            gol.at(i / gol.cols(), i % gol.cols()) = one;
-          }
-        }
         if (!grid.load(image, 
             sf::Vector2u(32, 32), gol.state(), gol.rows(), gol.cols()))
           return -1;
@@ -62,3 +84,4 @@ int main() {
 
   return 0;
 }
+
