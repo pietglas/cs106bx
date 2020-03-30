@@ -21,11 +21,11 @@ int main() {
   sf::RenderWindow window(sf::VideoMode(gol.cols() * 32, gol.rows() * 32), "Tilemap");
 
   // create the grid
-  Grid grid0, grid1, grid2, grid3, grid4;
-  std::vector<Grid> grids{grid0, grid1, grid2, grid3, grid4};
+  Grid grid;
+  //std::vector<Grid> grids{grid0, grid1, grid2, grid3, grid4};
   string image = "/home/piet/Projects/cs106bx/assignment_1/data/tileset2.ascii.png";
   unsigned int ctr = 0;
-  if (!grids[ctr].load(image, 
+  if (!grid.load(image, 
     sf::Vector2u(32, 32), initial_state, gol.rows(), gol.cols()))
     return -1;
 
@@ -48,7 +48,7 @@ int main() {
             gol.at(i / gol.cols(), i % gol.cols()) = one;
           }
         }
-        if (!grids[ctr].load(image, 
+        if (!grid.load(image, 
             sf::Vector2u(32, 32), gol.state(), gol.rows(), gol.cols()))
           return -1;
         }
@@ -56,7 +56,7 @@ int main() {
 
     // draw the map
     window.clear();
-    window.draw(grids[ctr]);
+    window.draw(grid);
     window.display();
   }
 
