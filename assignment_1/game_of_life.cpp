@@ -1,6 +1,8 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <SFML/Graphics.hpp>
+#include "grid.hpp"
 #include "game_of_life.h"
 
 // add sleep function for windows/linux
@@ -16,7 +18,7 @@ using StateVec = std::vector<unsigned int>;
 GOL::GameOfLife(bool simple_game): simple_game_{simple_game} {}
 
 // Read the initial state of the game from a text file
-bool GOL::ReadInitialState(const std::string& file_name) {
+bool GOL::read_initial_state(const std::string& file_name) {
   bool succes = true;
   std::ifstream read(file_name);
   if (read) {
@@ -83,3 +85,13 @@ void GOL::NextState() {
 	state_ = new_state;
 }
 
+void GOL::DrawGrid() {
+  while (!grid_.load(tile_set_, 
+    sf::Vector2u(32, 32), state_, rows_, cols_)) {
+    std::cout << "Unable to open file, reenter path" << std::endl;
+    cin.clear();
+    cin.ignore();
+    cin >> tile_set_;
+    grid_.load(tile_set_, sf::Vector2u(32, 32), state_, rows_, cols_);
+  }
+}

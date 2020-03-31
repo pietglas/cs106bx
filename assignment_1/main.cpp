@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
-#include "grid.hpp"
 #include "game_of_life.h"
 
 using StateVec = std::vector<unsigned int>;
@@ -20,28 +19,25 @@ int main() {
   std::string text_file;
   cout << "Enter the path to the file from which to read the initial state" << endl;
   cin >> text_file;
-  while (!gol.ReadInitialState(text_file)) {
+  while (!gol.read_initial_state(text_file)) {
     cout << "File not found, reenter the path" << endl;
     cin.clear();
     cin.ignore();
     cin >> text_file;
-    gol.ReadInitialState(text_file);
+    gol.read_initial_state(text_file);
   }
+  std::cout << "Enter the path to the tileset: " << std::endl;
+  std::string tile_set;
+  cin >> tile_set;
+  gol.set_tile_set(tile_set);
 
-  // get the initial state to fill in the grid
-  StateVec initial_state = gol.state();
-
+  // create the grid
+  gol.DrawGrid();
+  
   // create the window
   sf::RenderWindow window(sf::VideoMode(gol.cols() * 32, gol.rows() * 32), "Tilemap");
 
-  // create the grid
-  Grid grid;
-  string image = "/home/piet/Projects/cs106bx/assignment_1/data/tileset2.ascii.png";
-  unsigned int ctr = 0;
-  if (!grid.load(image, 
-    sf::Vector2u(32, 32), initial_state, gol.rows(), gol.cols()))
-    return -1;
-
+  // keep track of time in the game loop
   sf::Clock clock;
 
   // run the main loop
@@ -53,10 +49,7 @@ int main() {
     // if time > 2, go to the next state
     if (elapsed.asSeconds() > 2) {
       gol.NextState();
-      
-      if (!grid.load(image, 
-          sf::Vector2u(32, 32), gol.state(), gol.rows(), gol.cols()))
-        return -1;
+      gol.DrawGrid();
       clock.restart();  
     }
 
@@ -70,15 +63,13 @@ int main() {
       // go to next state if a key is pressed
       else if (event.type == sf::Event::KeyPressed) {   
         gol.NextState();
-        if (!grid.load(image, 
-            sf::Vector2u(32, 32), gol.state(), gol.rows(), gol.cols()))
-          return -1;
+        gol.DrawGrid();
         }
       }
 
     // draw the map
     window.clear();
-    window.draw(grid);
+    window.draw(gol.grid());
     window.display();
   }
 
