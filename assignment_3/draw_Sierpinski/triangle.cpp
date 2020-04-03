@@ -3,18 +3,37 @@
 class SierpinskiTriangle: public sf::Shape
 {
 public:
+    explicit SierpinskiTriangle(const sf::Vectorsf& a, const sf::Vector2f& b,
+                                const sf::Vector2f& c, unsigned int level=0):
+                                a_{a}, b_{b}, c_{c}, level_{level} {
+        if (level == 0) {
+            SierpinskiTriangle ptra = nullptr;
+            sierpinski_trian_a_ = ptra;
+            SierpinskiTriangle ptrb = nullptr;
+            sierpinski_trian_b_ = ptrb;
+            SierpinskiTriangle ptrc = nullptr;
+            sierpinski_trian_c_ = ptrc;
+        }
+        else {
 
+        }
+    }
 
 private:
+    unsigned int level_;
+    SierpinskiTriangle* sierpinski_trian_a_;
+    SierpinskiTriangle* sierpinski_trian_b_;
+    SierpinskiTriangle* sierpinski_trian_c_;
+
 	// vertices
-	sf::Vector2f A;
-	sf::Vector2f B;
-	sf::Vector2f C;
+	sf::Vector2f a_;
+	sf::Vector2f b_;
+	sf::Vector2f c_;
 
 	// line segments
-	sf::VertexArray AB(sf::Lines, 2);
-	sf::VertexArray AC(sf::Lines, 2);
-	sf::VertexArray BC(sf::Lines, 2);
+	sf::VertexArray ab_(sf::Lines, 2);
+	sf::VertexArray ac_(sf::Lines, 2);
+	sf::VertexArray bc_(sf::Lines, 2);
 };
 
 int main () {
@@ -47,11 +66,11 @@ int main () {
 	line3[1].color = sf::Color::Black;
 
 	while (window.isOpen()) {
-		
+
 		// handle events
 		sf::Event event;
 		while (window.pollEvent(event)) {
-			if (event.type == sf::Event::Closed) 
+			if (event.type == sf::Event::Closed)
 				window.close();
 		}
 
