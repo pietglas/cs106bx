@@ -11,11 +11,11 @@ public:
 	{}
 
 	static std::complex<double> MandelbrotSequence(std::complex<double> z, 
-									size_t max_iterations = 200) {
-		if (max_iterations == 0)
+									size_t iterations) {
+		if (iterations == 0)
 			return z;
 		else 
-			return std::pow(Mandelbrot::MandelbrotSequence(z, --max_iterations), 2) + z;
+			return std::pow(Mandelbrot::MandelbrotSequence(z, --iterations), 2) + z;
 	}
 
 	static bool InMandelbrot(std::complex<double> z, size_t max_iterations = 200) {
@@ -36,16 +36,14 @@ public:
 		mandelbrot_set_.reserve(vecsize);
 		for (int i = 0; i != vecsize; i++) {
 			// determine matrix-indices wrt chosen axes
-			int row = 1 + (i / cols);
-			int col = i % row;
+			int row = i / cols;
+			int col = i % cols;
 
 			// take the complex number corresponding to the pixel
-			double real_part = (framewidth_/2 - col) / (framewidth_ / 2);
-			double complex_part = (2 * (framelength_/3) - row) / (framewidth_ / 3);
+			double real_part = (col - 2 * framewidth_/3) / (framewidth_ / 3);
+			double complex_part = (row - (framelength_/2)) / (framewidth_ / 2);
 			std::complex<double> z(real_part, complex_part);
 			bool in_mandelbrot = Mandelbrot::InMandelbrot(z, max_iterations_);
-			if (in_mandelbrot)
-				std::cout << "In mandelbrot! " << std::endl;
 			mandelbrot_set_.push_back(in_mandelbrot);
 		}
 	}
@@ -57,10 +55,10 @@ public:
 		//unsigned int rows = framelength_;
 		for (int i = 0; i != pixels_.getVertexCount(); i++) {
 			// determine matrix-indices wrt chosen axes
-			int row = 1 + (i / cols);
-			int col = i % row;
+			int row = i / cols;
+			int col = i % cols;
 
-			pixels_[i].position = sf::Vector2f(col - 1, row - 1);
+			pixels_[i].position = sf::Vector2f(col, row);
 			if (mandelbrot_set_.at(i))
 				pixels_[i].color = sf::Color::Black;
 			else
