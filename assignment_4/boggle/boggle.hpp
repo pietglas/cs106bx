@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <complex>
 #include <string>
@@ -7,11 +9,15 @@
 #include <random>
 #include <cstdlib>
 #include <cmath>
+#include <fstream>
+#include "stringmethods.hpp"
+#include "game_cubes.hpp"
 
+using std::cout;
+using std::endl;
 using std::string;
 using set_strs = std::set<std::string>;
 using vec_strs = std::vector<std::string>;
-using vec_chars = std::vector<char>;
 using pair = std::pair<int, int>;
 using set_pairs = std::set<std::pair<int, int>>;
 
@@ -33,8 +39,10 @@ public:
 	}
 
 	void shuffle_cubes();
+	vec_strs get_cubes_shuffled() const {return cubes_shuffled_;}
 
 	void choose_cubes();
+	vec_strs get_sides_chosen() const {return cubes_chosen_;}
 
 	void set_dictionary();
 
@@ -43,39 +51,26 @@ public:
 	void SearchWordsPos(std::string& partial_word, pair position, 
 		set_pairs neighbors, set_pairs options);
 
-	void SearchWords();
+	void find_words();
+	set_strs get_words() const {return words_in_game_;}
 
 private:
 	bool simple_game_;
-	unsigned int game_size_;
-	unsigned int rows_;
-	unsigned int cols_;
+	int game_size_;
+	int rows_;
+	int cols_;
 	vec_strs cubes_shuffled_;
-	vec_chars cubes_chosen_;
+	vec_strs cubes_chosen_;
 	set_strs words_in_game_;
 	set_strs dictionary_;
 	const string* cubes_this_game_;
-
-	static const string kStandardCubes[16] = {
-		"AAEEGN", "ABBJOO", "ACHOPS", "AFFKPS",
-		"AOOTTW", "CIMOTU", "DEILRX", "DELRVY",
-		"DISTTY", "EEGHNW", "EEINSU", "EHRTVW",
-		"EIOSST", "ELRTTY", "HIMNQU", "HLNNRZ"
-	};
-	static const string kBigBoggleCubes[25] = {
-		"AAAFRS","AAEEEE","AAFIRS","ADENNN","AEEEEM",
-		"AEEGMU","AEGMNN","AFIRSY","BJKQXZ","CCNSTW",
-		"CEIILT","CEILPT","CEIPST","DDLNOR","DDHNOT",
-		"DHHLOR","DHLNOR","EIIITT","EMOTTT","ENSSSU",
-		"FIPRSY","GORRVW","HIPRRY","NOOTUW","OOOTTU"
-	};
 };
 
 void Boggle::shuffle_cubes() {
 	string empty_str = "";
 	cubes_shuffled_.resize(game_size_, empty_str);
 	for (int i = 0; i != game_size_; i++)
-		cubes_shuffled_.at(i) = cubes_this_game_.at(i);
+		cubes_shuffled_.at(i) = cubes_this_game_[i];
 	auto rng = std::default_random_engine {};
 	// STL implementation of the Fisher-Yates algorithm
 	std::shuffle(cubes_shuffled_.begin(), cubes_shuffled_.end(), rng);
@@ -83,20 +78,26 @@ void Boggle::shuffle_cubes() {
 
 void Boggle::choose_cubes() {
 	srand(time(nullptr));
-	cubes_chosen_.resize(game_size_, "");
+	string empty_str = "";
+	cubes_chosen_.resize(game_size_, empty_str);
 	for (int i = 0; i != game_size_; i++) {
-		int random_nr = std::rand % game_size_;
-		cubes_chosen_.at(i) = cubes_shuffled_[i][random_nr];
+		int random_nr = std::rand() % 6;
+		char chosen_side = cubes_shuffled_[i][random_nr];
+		char lrcase = std::tolower(chosen_side);
+		string side(1, lrcase);
+		cubes_chosen_.at(i) = side;
 	}
 }
 
-void set_dictionary() {
+void Boggle::set_dictionary() {
 	string path_to_dictionary;
-	std::getline(cin, path_to_dictionary);
-	ifstream dictionary(path_to_dictionary);
+	cout << "Enter path to the dictionary: " << endl;
+	std::getline(std::cin, path_to_dictionary);
+	std::ifstream dictionary(path_to_dictionary);
 	while (!dictionary) {
 		std::cout << "Couln't find dictionary, reenter path" << std::endl;
-		std::getline(cin, dictionary);
+		std::getline(std::cin, path_to_dictionary);
+		dictionary.open(path_to_dictionary);
 	}
 	string new_word;
 	while (dictionary >> new_word) 
@@ -105,13 +106,15 @@ void set_dictionary() {
 
 set_pairs Boggle::DetermineNeighbors(pair position) {
 	set_pairs neighbors;
-	unsigned int row = position.first;
-	unsigned int col = position.second;
+	int row = position.first;
+	int col = position.second;
 
 	for (int i = std::max(0, row - 1); i != row + 2 && i != rows_; i++) {
 		for (int j = std::max(0, col - 1); j != col + 2 && j != cols_; j++) {
-			pair neighbor(i, j);
-			neighbors.emplace(neighbor);
+			if (i != row || j != col) {
+				pair neighbor(i, j);
+				neighbors.emplace(neighbor);
+			}
 		}
 	}
 	return neighbors;	
@@ -121,18 +124,22 @@ void Boggle::SearchWordsPos(std::string& partial_word, pair position,
 		set_pairs neighbors, set_pairs options) {
 	if (!options.empty()) {
 		for (auto& new_position : neighbors) {
+			// try next neigbor if the current one is not among remaining options
+			if (options.find(new_position) == options.end())
+				continue;
 			// remove this character from the options that we still need
 			// to explore
 			options.erase(new_position);
 
+			int array_index = cols_ * new_position.first + new_position.second;
 			std::string partial_added = 
-				partial_word + cubes_chosen_.at(position.first).at(position.second);
+				partial_word + cubes_chosen_.at(array_index);
 			bool keep_looking = false;
 			
 			// check if we need to continue with this string, by comparing it
 			// with the dictionary. 
-			for (auto& words : dictionary) {
-				if (!words.starts_with(partial_added)) 
+			for (auto& word : dictionary_) {
+				if (!Prefix(partial_added, word)) 
 					continue;
 				else {
 					keep_looking = true;
@@ -145,14 +152,15 @@ void Boggle::SearchWordsPos(std::string& partial_word, pair position,
 				// determine new neighbors
 				set_pairs new_neighbors = Boggle::DetermineNeighbors(new_position);
 
-				if (partial_added.length >= 4) {
+				if (partial_added.length() >= 4 && 
+					dictionary_.find(partial_added) != dictionary_.end()) {
 					words_in_game_.emplace(partial_added);
-					Boggle::SearchWords(partial_added, new_position, new_neighbors, 
-						options, words_in_game_);
+					Boggle::SearchWordsPos(partial_added, new_position, new_neighbors, 
+						options);
 				}
 				else { // same as above, needs adaption
-					Boggle::SearchWords(partial_added, new_position ,new_neighbors,
-						options, words_in_game_);
+					Boggle::SearchWordsPos(partial_added, new_position ,new_neighbors,
+						options);
 				}
 			
 			// put position back into posible options, so it can be explored when 
@@ -163,21 +171,21 @@ void Boggle::SearchWordsPos(std::string& partial_word, pair position,
 	}
 }
 
-void Boggle::SearachWords() {
+void Boggle::find_words() {
 	set_pairs options;
 	for (int row = 0; row != rows_; row++) {
 		for (int col = 0; col != cols_; col++) {
-			pair position(i, j);
+			pair position(row, col);
 			options.emplace(position);
 		}
 	}
 
 	for (int row = 0; row != rows_; row++) {
 		for (int col = 0; col != cols_; col++) {
-			pair position(i, j);
+			pair position(row,col);
 			set_pairs neighbors = Boggle::DetermineNeighbors(position);
-			string empty_word = "";
-			Boggle::SearchWordsPos(empty_word, position, neighbors, options);
+			string first_letter = cubes_chosen_.at(row * cols_ + col);
+			Boggle::SearchWordsPos(first_letter, position, neighbors, options);
 		}
 	}
 }
