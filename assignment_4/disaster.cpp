@@ -11,10 +11,14 @@ using std::endl;
 
 using map_network = map<string, set<string>>;
 
-set<string> SafeCities(const map_network& network, set<string>& cities_without_recourses,
-                       set<string>& unsafe_cities, int nr_recources) {
+int & SafeCities(const map_network & network, set<string> & cities_without_recourses,
+                       set<string> & unsafe_cities, int nr_recources, 
+                       int & min_unsafe_cities) {
+    
     if (nr_recources == 0)
-        return safe_cities;
+        min_unsafe_cities = unsafe_cities.size();
+    else if (nr_recources > 0 && unsafe_cities.size() == 0)
+        min_unsafe_cities = 0;
     else {
         // Determine which cities without recourses are connected to the
         // highest number of currently unsafe cities
@@ -29,7 +33,7 @@ set<string> SafeCities(const map_network& network, set<string>& cities_without_r
             if (unsafe_reachable_cities == network_unsafe.begin()->second) {
                 network_unsafe.emplace(city, unsafe_reachable_cities);
             }
-            else if (unsafe_reachable_cities > network_unsafe.begin()->second)
+            else if (unsafe_reachable_cities > network_unsafe.begin()->second) {
                 network_unsafe.clear();
                 network_unsafe.emplace(city, unsafe_reachable_cities);
             }
@@ -41,11 +45,21 @@ set<string> SafeCities(const map_network& network, set<string>& cities_without_r
         for (auto& city_indexed : network_unsafe) {
             string city = city_indexed.first;
             cities_without_recourses.erase(city);
+            
+            set<string> removed_cities;
             for (auto& connected_city : network.at(city)) {
-                unsafe_cities.erase(connected_city);
+                size_t removed = unsafe_cities.erase(connected_city);
+                if (removed)
+                   removed_cities.insert(connected_city); 
             }
-            return SafeCities(network, cities_without_recourses,
+            SafeCities(network, cities_without_recourses,
                               unsafe_cities, nr_recources - 1);
+            
+            // do the backtracking
+            for (auto& removed_city : removed_cities) 
+                unsafe_cities.insert(removed_city);
+            cities_without_recourses.insert(city);
         }
     }
+    return min_unsafe_cities;
 }
