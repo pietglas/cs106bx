@@ -12,6 +12,6 @@ public:
 	static PQueueHeap* merge(PQueueHeap* one, PQueueHeap* two);
 private:
 	string* elts_;
-	size_t size_;
 	size_t capacity_;
+	void heapifyParentChilds(size_t pos);
 };
