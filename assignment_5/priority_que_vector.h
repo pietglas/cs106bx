@@ -8,11 +8,12 @@
 class PQueueVector : public PQueue {
 public:
 	PQueueVector() {}
+	virtual ~PQueueVector() {} 		// 'virtual' prevents undefined behaviour 
 	void enqueue(const std::string& elem) override;
 	std::string extractMin() override;
 	const std::string& peek() override;
-	static PQueueVector* merge(PQueueVector* one, PQueueVector* two) override;
+	PQueueVector* merge(PQueueVector* one, PQueueVector* two);
 
 private:
 	std::vector<std::string> elts_;
-}
+};

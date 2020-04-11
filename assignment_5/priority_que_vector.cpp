@@ -1,6 +1,6 @@
 #include <vector>
 #include <string>
-#include "priority_queue_vector.h"
+#include "priority_que_vector.h"
 #include <algorithm>
 
 void PQueueVector::enqueue(const std::string& elem) {
@@ -11,7 +11,7 @@ void PQueueVector::enqueue(const std::string& elem) {
 std::string PQueueVector::extractMin() {
 	if (elts_.empty())
 		throw "The vector is empty";
-	std::string min_elem = elts_.begin();
+	std::string min_elem = elts_.at(0);
 	std::vector<std::string>::iterator pos;
 	for (auto it = elts_.begin(); it != elts_.end(); it++) {
 		if (*it < min_elem) {
@@ -28,7 +28,7 @@ const std::string& PQueueVector::peek() {
 	if (elts_.empty())
 		throw "The vector is empty";
 	std::vector<std::string>::iterator pos;
-	std::string min_elem = elts_.begin();
+	std::string min_elem = elts_.at(0);
 	for (auto it = elts_.begin(); it != elts_.end(); it++) {
 		if (*it < min_elem) {
 			pos = it;
@@ -38,9 +38,11 @@ const std::string& PQueueVector::peek() {
 }
 
 
-static PQueueVector* PQueueVector::merge(PQueueVector* one, PQueueVector* two) {
-	static PQueueVector merged;  // defining a static variable so it stays in scope
+PQueueVector* PQueueVector::merge(PQueueVector* one, PQueueVector* two) {
+	static PQueueVector* merged = new PQueueVector;  // defining a static variable so it stays in scope
 	std::merge(one->elts_.begin(), one->elts_.end(),
-		two->elts_.begin(), two->elts_.end(), merged.elts_.begin());
-	return &merged;
+		two->elts_.begin(), two->elts_.end(), std::back_inserter(merged->elts_));
+	delete one;
+	delete two;
+	return merged;
 }
