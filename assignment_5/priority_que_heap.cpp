@@ -5,6 +5,10 @@
 #include "priority_que_heap.h"
 #include "/home/piet/Projects/cs106bx/common_functions.hpp"		// linux directory!
 
+using std::cout;	using std::endl;
+
+namespace pqueue {
+
 PQueueHeap::PQueueHeap(): PQueue(0), capacity_{10} {
 	elts_ = new std::string[capacity_];
 }
@@ -19,19 +23,19 @@ size_t& PQueueHeap::heapifyParentChilds(size_t& pos) {
 
 	size_t pos_child1 = 2 * pos + 1;
 	size_t pos_child2 =  2 * (pos + 1);
-	if (pos_child2 < size_ && elts_[pos] > max(elts_[pos_child1], elts_[pos_child2])) {
+	if (pos_child2 < size_ && elts_[pos] > std::min(elts_[pos_child1], elts_[pos_child2])) {
 		if (elts_[pos_child1] < elts_[pos_child2]) {
-			swap(elts_[pos_child1], elts_[pos]);
+			commfunc::swap(elts_[pos_child1], elts_[pos]);
 			pos =  pos_child1;
 		}
 
 		else {
-			swap(elts_[pos_child2], elts_[pos]);
+			commfunc::swap(elts_[pos_child2], elts_[pos]);
 			pos =  pos_child2;
 		}
 	}
 	else if (pos_child1 == size_ - 1 && elts_[pos] > elts_[pos_child1]) {
-		swap(elts_[pos], elts_[pos_child1]);
+		commfunc::swap(elts_[pos], elts_[pos_child1]);
 		pos = pos_child1;
 	}
 	return pos;
@@ -49,16 +53,20 @@ void PQueueHeap::enqueue(const std::string& elem) {
 		elts_[size_] = elem;
 		delete[] trash;
 	}
-	else
+	else {
 		elts_[size_] = elem;
+		//cout << "added element: " << elts_[size_] << endl;
+	}
 
 	++size_;
 	
 	// heapify to make the tree complete
-	size_t pos = size_;
+	size_t pos = size_ - 1;
+	//cout << "We are at position " << pos << endl;
 	while (elts_[pos] < elts_[pos / 2]) {
-		swap(elts_[pos], elts_[pos / 2]);
+		commfunc::swap(elts_[pos], elts_[pos / 2]);
 		pos /= 2;
+		//cout << elts_[pos] << ", " << elts_[pos/2];
 	}
 
 }
@@ -74,7 +82,12 @@ std::string PQueueHeap::extractMin() {
 
 	// heapify to obtain a complete tree 
 	size_t pos = 0;
-	while (elts_[pos] > std::max(elts_[2 * pos + 1], elts_[2 * (pos + 1)])) 
+	while (elts_[pos] > std::min(elts_[2 * pos + 1], elts_[2 * (pos + 1)]) &&
+		(2 * (pos + 1)) < size_) {
+		pos = PQueueHeap::heapifyParentChilds(pos);
+		cout << "heapified position " << pos << endl;
+	}
+	if ((2 * pos + 1) == size_ - 1)
 		PQueueHeap::heapifyParentChilds(pos);
 
 	return first_elt;
@@ -86,30 +99,38 @@ const std::string& PQueueHeap::peek() {
 	return elts_[0];
 }
 
-PQueueHeap* PQueueHeap::merge(PQueueHeap* one, PQueueHeap* two) {
+PQueueHeap*& PQueueHeap::merge(PQueueHeap*& one, PQueueHeap*& two) {
 	if (one->empty() || one == nullptr)
 		return two;
 	else if (two->empty() || two == nullptr)
 		return one;
 	else {
 		static PQueueHeap* merged = new PQueueHeap;  // custom copy constructor needed?
-		size_t pos = 0;
-		for (; pos != one->size_; pos++)
+		for (size_t pos = 0; pos != one->size_; pos++)
 			merged->enqueue(one->elts_[pos]);	// creates new array if we run out of space
-		pos = 0;
-		for(; pos != two->size_; pos++)
-			merged->enqueue(two->elts_[pos]);
-		merged->size_ = (one->size_ * two->size_);
+		for(size_t pos1; pos1 != two->size_; pos1++)
+			merged->enqueue(two->elts_[pos1]);
+		merged->size_ = (one->size_ * two->size_ - 1);
 		delete one;
 		delete two;
 
 		// heapify. The first node must be heapified outside of the for-loop, since we're
 		// working with unsigned integers. 
-		size_t i = size_ - 1;
+		size_t i = merged->size_ - 1;
 		for (; i != 0; i--) 
-			PQueueHeap::heapifyParentChilds(i);
-		PQueueHeap::heapifyParentChilds(i);		
+			merged->heapifyParentChilds(i);
+		i = 0;
+		merged->heapifyParentChilds(i);		
 
 		return merged; 
 	}
 }
+
+void PQueueHeap::print() {
+	cout << "The queue has size: " << size_ << endl;
+	for (int i = 0; i != size_; i++)
+		cout << elts_[i] << ", ";
+	cout << endl;
+}
+
+}	// end namespace pqueue

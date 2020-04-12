@@ -2,6 +2,8 @@
 #include<string>
 #include "priority_que.h"
 
+namespace pqueue {
+
 class PQueueHeap : public PQueue {
 public:
 	PQueueHeap();
@@ -10,9 +12,13 @@ public:
 	void enqueue(const std::string& elem) override;
 	std::string extractMin() override;
 	const std::string& peek() override;
-	PQueueHeap* merge(PQueueHeap* one, PQueueHeap* two);
+	static PQueueHeap*& merge(PQueueHeap*& one, PQueueHeap*& two);
+
+	void print();			// only there for debugging purposes
 private:
 	std::string* elts_;
 	size_t capacity_;
 	size_t& heapifyParentChilds(size_t& pos);
 };
+
+} 	// end namespace pqueue

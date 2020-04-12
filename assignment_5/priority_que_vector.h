@@ -5,6 +5,8 @@
 #include <string>
 #include "priority_que.h"
 
+namespace pqueue {
+
 class PQueueVector : public PQueue {
 public:
 	PQueueVector() {}
@@ -17,3 +19,5 @@ public:
 private:
 	std::vector<std::string> elts_;
 };
+
+} 	// end namespace pqueue

@@ -3,6 +3,8 @@
 #include "priority_que_vector.h"
 #include <algorithm>
 
+namespace pqueue {
+
 void PQueueVector::enqueue(const std::string& elem) {
 	elts_.push_back(elem);
 }
@@ -46,3 +48,5 @@ PQueueVector* PQueueVector::merge(PQueueVector* one, PQueueVector* two) {
 	delete two;
 	return merged;
 }
+
+}	// end namespace pqueue
