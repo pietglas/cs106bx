@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <algorithm>		// for std::min()
 #include <stdexcept>
 #include <iostream>
 
@@ -20,9 +21,47 @@ class DLinkedList {
 public:
 	DLinkedList(): size_{0} {};
 	DLinkedList(T data): size_{1} {
-		front_ = new Node<T>{data, nullptr, nullptr};
+		front_ = new Node<T>;
+		front_->data = data;
+		front_->prev = nullptr;
+		front_->next = nullptr;
 		back_ = front_;
 	}
+
+	DLinkedList(const DLinkedList& rhs) {
+		if (rhs.getSize() == 0)
+			size_ = 0;
+		else {
+			size_ = rhs.getSize();
+			// copy the front node
+			front_ = new Node<T>;
+			front_->data = rhs.getFront();
+			front_->prev = nullptr;
+			if (size_ > 1) {
+				// copy the nodes between front and back
+				size_t pos = 1;
+				Node<T>* node = front_;
+				while (pos < size_ - 1) {
+					node->next = new Node<T>;
+					node->next->data = rhs.getNode(pos);
+					node->next->prev = node;
+					node = node->next;
+					++pos;
+				}
+				// copy the back node 
+				node->next = new Node<T>;
+				back_ = node->next;
+				back_->data = rhs.getBack();
+				back_->prev = node;
+				back_->next = nullptr;
+			}
+			else {
+				front_->next = nullptr;
+				back_ = front_;
+			}
+		}
+	}
+
 	~DLinkedList() {
 		while (front_->next != nullptr) {
 			front_ = front_->next;	// point to the next object
@@ -32,13 +71,51 @@ public:
 		delete front_;
 	}
 
+	DLinkedList& operator =(const DLinkedList& rhs) {
+		size_t pos = 0;
+		for (; pos != std::min(size_, rhs.getSize()); pos++)
+			setNode(pos) = rhs.getNode(pos);
+
+		// if the lists have equal size, skip this block
+		if (size_ != rhs.getSize()) {
+			if (size_ < rhs.getSize()) {
+				while (pos < rhs.getSize()) {
+					addBack(rhs.getNode(pos));
+					++pos;
+				}
+			}
+			else {
+				for (int i = 0; i != size_ - rhs.getSize(); i++)
+					extractNode(pos);
+			}
+		}
+
+		return *this;
+	}
+
 	// TODO: add copy constructor, copy assignment and move constructor!
+
+	size_t getSize() const {return size_;}
 
 	const T& getFront() const {return front_->data;}
 
 	const T& getBack() const {return back_->data;}
 
 	const T& getNode(size_t get_pos) const {
+		if (get_pos >= size_)
+			throw std::out_of_range("nothing here, out of bounds");
+		Node<T>* node = front_;
+		size_t pos = 0;
+		while (pos != get_pos) 
+			node = node->next;
+		return node->data;
+	}
+
+	T& setFront() {return front_->data;}
+
+	T& setBack() {return back_->data;}
+
+	T& setNode(size_t get_pos) {
 		if (get_pos >= size_)
 			throw std::out_of_range("nothing here, out of bounds");
 		Node<T>* node = front_;
@@ -90,7 +167,7 @@ public:
 		if (size_ == 0 || add_pos == 0) {
 			addFront(data);
 		}
-		else if (add_pos == size_ - 1)
+		else if (add_pos == size_)
 			addBack(data);
 		else {
 			Node<T>* node = front_;
@@ -111,8 +188,6 @@ public:
 			node->prev = new_node;
 			++size_;		
 		}
-		
-		
 	}
 
 	T extractFront() {

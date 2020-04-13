@@ -26,6 +26,15 @@ int main () {
 	lijst.extractNode(1);
 	cout << "removed something from position 1" << endl;
 	lijst.print();
+	adt::DLinkedList<int> lust = lijst;
+	cout << "Created a new list from another one" << endl;
+	lust.print();
+	lust.addNode(1, 1);
+	cout << "added 1 to back of new list" << endl;
+	lust.print();
+	lijst = lust;
+	cout << "copied old list from new list" << endl;
+	lijst.print();
 
 
 
