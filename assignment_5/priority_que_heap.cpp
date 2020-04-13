@@ -2,6 +2,7 @@
 #include <string>
 #include <algorithm>	// for std::max()
 #include <utility> 		// for std::move()
+#include <stdexcept>
 #include "priority_que_heap.h"
 #include "/home/piet/Projects/cs106bx/common_functions.hpp"		// linux directory!
 
@@ -73,7 +74,7 @@ void PQueueHeap::enqueue(const std::string& elem) {
 
 std::string PQueueHeap::extractMin() {
 	if (size_ == 0)
-		throw "The PQueueHeap is empty!";
+		throw std::out_of_range("the priority queue is empty");	// doesn't show
 	std::string first_elt = std::move(elts_[0]);
 	// move the last element to the first position, in case they are distinct
 	if (size_ > 1)
@@ -85,7 +86,6 @@ std::string PQueueHeap::extractMin() {
 	while (elts_[pos] > std::min(elts_[2 * pos + 1], elts_[2 * (pos + 1)]) &&
 		(2 * (pos + 1)) < size_) {
 		pos = PQueueHeap::heapifyParentChilds(pos);
-		cout << "heapified position " << pos << endl;
 	}
 	if ((2 * pos + 1) == size_ - 1)
 		PQueueHeap::heapifyParentChilds(pos);
@@ -95,7 +95,7 @@ std::string PQueueHeap::extractMin() {
 
 const std::string& PQueueHeap::peek() {
 	if (size_ == 0)
-		throw "The PQueueHeap is empty!";
+		throw std::out_of_range("the priority queue is empty");	
 	return elts_[0];
 }
 
@@ -105,6 +105,7 @@ PQueueHeap*& PQueueHeap::merge(PQueueHeap*& one, PQueueHeap*& two) {
 	else if (two->empty() || two == nullptr)
 		return one;
 	else {
+		// if not declared static, the program crashes with segmentation fault
 		static PQueueHeap* merged = new PQueueHeap;  // custom copy constructor needed?
 		for (size_t pos = 0; pos != one->size_; pos++)
 			merged->enqueue(one->elts_[pos]);	// creates new array if we run out of space

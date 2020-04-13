@@ -23,8 +23,8 @@ public:
 	// by the derived classes
 	virtual void enqueue(const std::string& elem) {}
 	virtual std::string extractMin() {return std::string("");}
-	virtual const std::string& peek() {return std::string("");}
-	
+	// returning ref to temp object, it's a dummy function anyway
+	virtual const std::string& peek() {return std::string("");} 
 protected:
 	size_t size_;
 };
