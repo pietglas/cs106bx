@@ -19,6 +19,7 @@ private:
 	std::string* elts_;
 	size_t capacity_;
 	size_t& heapifyParentChilds(size_t& pos);
+	void heapify(size_t& pos);
 };
 
 } 	// end namespace pqueue

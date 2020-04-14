@@ -29,7 +29,6 @@ PQueueDLList*& PQueueDLList::merge(PQueueDLList*& one, PQueueDLList*& two){
 
 		return merged; 
 	}
-
 }
 
 void PQueueDLList::enqueue(const std::string& elem) {

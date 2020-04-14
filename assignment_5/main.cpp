@@ -12,30 +12,37 @@ using std::cout;
 using std::endl;
 
 int main () {
-	pqueue::PQueueDLList* pq = new pqueue::PQueueDLList;
-	pqueue::PQueueDLList* pq1 = new pqueue::PQueueDLList;
-	string piet = "piet";
-	string klaas = "klaas";
-	string johan = "johan";
-	string martin = "martin";
-	pq->enqueue(klaas);
-	pq->enqueue(piet);
-	pq->enqueue(johan);
-	pq->enqueue(martin);
-	pq->print();
-	string removed = pq->extractMin();
-	cout << "removed name: " << removed << endl;
-	pq->print();
+	/*****Test instances for PQueueDLList*****/
 
-	string annelies = "annelies";
-	string fj = "freerkjan";
-	pq1->enqueue(annelies);
-	pq1->enqueue(fj);
-	string some_name = pq1->peek();
-	cout << some_name << endl;
+	// pqueue::PQueueDLList* pq = new pqueue::PQueueDLList;
+	// pqueue::PQueueDLList* pq1 = new pqueue::PQueueDLList;
+	// string piet = "piet";
+	// string klaas = "klaas";
+	// string johan = "johan";
+	// string martin = "martin";
+	// pq->enqueue(klaas);
+	// pq->enqueue(piet);
+	// pq->enqueue(johan);
+	// pq->enqueue(martin);
+	// pq->print();
+	// string removed = pq->extractMin();
+	// cout << "removed name: " << removed << endl;
+	// pq->print();
+
+	// string annelies = "annelies";
+	// string fj = "freerkjan";
+	// pq1->enqueue(annelies);
+	// pq1->enqueue(fj);
+	// string some_name = pq1->peek();
+	// cout << some_name << endl;
 	
-	pqueue::PQueueDLList* pq3 = pqueue::PQueueDLList::merge(pq, pq1);
-	pq3->print();
+	// pqueue::PQueueDLList* pq3 = pqueue::PQueueDLList::merge(pq, pq1);
+	// pq3->print();
+
+	// delete pq;
+	// delete pq1;
+	// delete pq3;
+
 
 
 
@@ -83,31 +90,32 @@ int main () {
 
 	/*****Test instances for PQueueHeap*****/
 
-	// pqueue::PQueueHeap* pq = new pqueue::PQueueHeap;
-	// pqueue::PQueueHeap* pq1 = new pqueue::PQueueHeap;
-	// string piet = "piet";
-	// string klaas = "klaas";
-	// string johan = "johan";
-	// string martin = "martin";
-	// pq->enqueue(klaas);
-	// pq->enqueue(piet);
-	// pq->enqueue(johan);
-	// pq->enqueue(martin);
-	// pq->print();
-	// string removed = pq->extractMin();
-	// cout << "removed name: " << removed << endl;
-	// pq->print();
+	pqueue::PQueueHeap* pq = new pqueue::PQueueHeap;
+	pqueue::PQueueHeap* pq1 = new pqueue::PQueueHeap;
+	string piet = "piet";
+	string klaas = "klaas";
+	string johan = "johan";
+	string martin = "martin";
+	pq->enqueue(klaas);
+	pq->enqueue(piet);
+	pq->enqueue(johan);
+	pq->enqueue(martin);
+	pq->print();
+	string removed = pq->extractMin();
+	cout << "removed name: " << removed << endl;
+	pq->print();
 
-	// string annelies = "annelies";
-	// string fj = "freerkjan";
-	// pq1->enqueue(annelies);
-	// pq1->enqueue(fj);
-	// string some_name = pq1->peek();
-	// cout << some_name << endl;
-	// pqueue::PQueueHeap* pq3 = pqueue::PQueueHeap::merge(pq, pq1);
-	// pq3->print();
+	string annelies = "annelies";
+	string fj = "freerkjan";
+	string job = "job";
+	pq1->enqueue(annelies);
+	pq1->enqueue(fj);
+	pq1->enqueue(job);
+	string some_name = pq1->peek();
+	cout << some_name << endl;
+	pqueue::PQueueHeap* pq3 = pqueue::PQueueHeap::merge(pq, pq1);
+	pq3->print();
 
-	// pqueue::PQueueHeap pq4;
-	// pq4.peek();
+
 
 }

@@ -19,9 +19,6 @@ PQueueHeap::~PQueueHeap() {
 }
 
 size_t& PQueueHeap::heapifyParentChilds(size_t& pos) {
-	if (pos >= size_)
-		throw "Out of bounds";
-
 	size_t pos_child1 = 2 * pos + 1;
 	size_t pos_child2 =  2 * (pos + 1);
 	if (pos_child2 < size_ && elts_[pos] > std::min(elts_[pos_child1], elts_[pos_child2])) {
@@ -42,6 +39,19 @@ size_t& PQueueHeap::heapifyParentChilds(size_t& pos) {
 	return pos;
 }
 
+// pushes the root down to obtain a heap. Assumes that the children are
+// the roots of heaps. 
+void PQueueHeap::heapify(size_t& pos) {
+	size_t old_pos = pos;
+	size_t new_pos = pos;
+	if (pos < size_) {
+		do {
+			old_pos = pos;
+			new_pos = PQueueHeap::heapifyParentChilds(pos);		// updates pos
+		} while (pos < size_ && old_pos != new_pos);
+	}
+}
+
 void PQueueHeap::enqueue(const std::string& elem) {
 	// if we have reached our maximum capacity, replace our array by a new one,
 	// of size 150% of the original one
@@ -56,18 +66,15 @@ void PQueueHeap::enqueue(const std::string& elem) {
 	}
 	else {
 		elts_[size_] = elem;
-		//cout << "added element: " << elts_[size_] << endl;
 	}
 
 	++size_;
 	
 	// heapify to make the tree complete
 	size_t pos = size_ - 1;
-	//cout << "We are at position " << pos << endl;
 	while (elts_[pos] < elts_[pos / 2]) {
 		commfunc::swap(elts_[pos], elts_[pos / 2]);
 		pos /= 2;
-		//cout << elts_[pos] << ", " << elts_[pos/2];
 	}
 
 }
@@ -83,12 +90,7 @@ std::string PQueueHeap::extractMin() {
 
 	// heapify to obtain a complete tree 
 	size_t pos = 0;
-	while (elts_[pos] > std::min(elts_[2 * pos + 1], elts_[2 * (pos + 1)]) &&
-		(2 * (pos + 1)) < size_) {
-		pos = PQueueHeap::heapifyParentChilds(pos);
-	}
-	if ((2 * pos + 1) == size_ - 1)
-		PQueueHeap::heapifyParentChilds(pos);
+	PQueueHeap::heapify(pos);
 
 	return first_elt;
 }
@@ -108,11 +110,17 @@ PQueueHeap*& PQueueHeap::merge(PQueueHeap*& one, PQueueHeap*& two) {
 	else {
 		// if not declared static, the program crashes with segmentation fault
 		static PQueueHeap* merged = new PQueueHeap;  // custom copy constructor needed?
-		for (size_t pos = 0; pos != one->size_; pos++)
-			merged->enqueue(one->elts_[pos]);	// creates new array if we run out of space
-		for(size_t pos1; pos1 != two->size_; pos1++)
-			merged->enqueue(two->elts_[pos1]);
-		merged->size_ = (one->size_ * two->size_ - 1);
+		merged->size_ = (one->size_ + two->size_);
+		merged->elts_ = new std::string[merged->size_];
+		for (size_t pos = 0; pos != one->size_; pos++) {
+			merged->elts_[pos] = one->elts_[pos];	// creates new array if we run out of space
+			cout << "Added element " << merged->elts_[pos] << endl;
+		}
+		for(size_t pos1 = one->size_; pos1 != merged->size_; pos1++) {
+			merged->elts_[pos1] = two->elts_[pos1 - one->size_];
+			cout << "Added element " << merged->elts_[pos1] << endl;
+		}
+		
 		delete one;
 		delete two;
 
@@ -120,9 +128,9 @@ PQueueHeap*& PQueueHeap::merge(PQueueHeap*& one, PQueueHeap*& two) {
 		// working with unsigned integers. 
 		size_t i = merged->size_ - 1;
 		for (; i != 0; i--) 
-			merged->heapifyParentChilds(i);
+			merged->heapify(i);
 		i = 0;
-		merged->heapifyParentChilds(i);		
+		merged->heapify(i);		
 
 		return merged; 
 	}
