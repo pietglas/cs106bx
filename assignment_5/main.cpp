@@ -4,6 +4,7 @@
 #include "priority_que_vector.h"
 #include "priority_que_heap.h"
 #include "dlinked_list.hpp"
+#include "/home/piet/Projects/cs106bx/common_functions.hpp"		// linux directory!
 
 using std::string;
 using std::cout;
@@ -30,10 +31,20 @@ int main () {
 	cout << "Created a new list from another one" << endl;
 	lust.print();
 	lust.addNode(1, 1);
-	cout << "added 1 to back of new list" << endl;
+	cout << "added 1 to back of lust" << endl;
+	lust.print();
+	lust.setNode(1) = 2;
 	lust.print();
 	lijst = lust;
-	cout << "copied old list from new list" << endl;
+	cout << "copied lijst from lust" << endl;
+	lijst.print();
+	lijst.addBack(3);
+	cout << "added " << lijst.getBack() << " to back of lijst" << endl;
+	cout << "the size of lijst is " << lijst.getSize() << endl;
+	lijst.print();
+	lijst = lust;
+	lijst.print();
+	commfunc::swap(lijst.setNode(0), lijst.setNode(1));
 	lijst.print();
 
 
