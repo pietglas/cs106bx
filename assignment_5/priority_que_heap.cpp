@@ -99,6 +99,7 @@ const std::string& PQueueHeap::peek() {
 	return elts_[0];
 }
 
+// The following is flawed, since enqueueing does already make sure that the order is right!
 PQueueHeap*& PQueueHeap::merge(PQueueHeap*& one, PQueueHeap*& two) {
 	if (one->empty() || one == nullptr)
 		return two;

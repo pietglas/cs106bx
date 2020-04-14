@@ -154,18 +154,21 @@ DLinkedList<T>& DLinkedList<T>::operator =(const DLinkedList& rhs) {
 // TODO: add move constructor and move assignment!
 template<typename T>
 size_t DLinkedList<T>::getSize() const {return size_;}
+
 template<typename T>
 const T& DLinkedList<T>::getFront() const {
 	if (size_ == 0) 
 		throw std::out_of_range("Front cannot be changed, list is empty");
 	return front_->data;
 }
+
 template<typename T>
 const T& DLinkedList<T>::getBack() const {
 	if (size_ == 0) 
 		throw std::out_of_range("Back cannot be changed, list is empty");
 	return back_->data;
 }
+
 template<typename T>
 const T& DLinkedList<T>::getNode(size_t get_pos) const {
 	if (get_pos >= size_)
@@ -184,18 +187,21 @@ const T& DLinkedList<T>::getNode(size_t get_pos) const {
 		return node->data;
 	}
 }
+
 template<typename T>
 T& DLinkedList<T>::setFront() {
 	if (size_ == 0) 
 		throw std::out_of_range("Front cannot be changed, list is empty");
 	return front_->data;
 }
+
 template<typename T>
 T& DLinkedList<T>::setBack() {
 	if (size_ == 0) 
 		throw std::out_of_range("Back cannot be changed, list is empty");
 	return back_->data;
 }
+
 template<typename T>
 T& DLinkedList<T>::setNode(size_t get_pos) {
 	if (get_pos >= size_)
@@ -214,6 +220,7 @@ T& DLinkedList<T>::setNode(size_t get_pos) {
 		return node->data;
 	}
 }
+
 template<typename T>
 void DLinkedList<T>::addFront(const T& data) {
 	Node<T>* new_front = new Node<T>;
@@ -233,6 +240,7 @@ void DLinkedList<T>::addFront(const T& data) {
 	}
 	++size_;
 }
+
 template<typename T>
 void DLinkedList<T>::addBack(const T& data) {
 	Node<T>* new_back = new Node<T>;
@@ -250,6 +258,7 @@ void DLinkedList<T>::addBack(const T& data) {
 	}
 	++size_;
 }
+
 template<typename T>
 void DLinkedList<T>::addNode(const T& data, size_t add_pos) {
 	if (add_pos > size_)
@@ -279,6 +288,7 @@ void DLinkedList<T>::addNode(const T& data, size_t add_pos) {
 		++size_;		
 	}
 }
+
 template<typename T>
 T DLinkedList<T>::extractFront() {
 	if (size_ == 0)
@@ -294,6 +304,7 @@ T DLinkedList<T>::extractFront() {
 	return data;
 
 }
+
 template<typename T>
 T DLinkedList<T>::extractBack() {
 	if (size_ == 0)
@@ -308,6 +319,7 @@ T DLinkedList<T>::extractBack() {
 	--size_;
 	return data;
 }
+
 template<typename T>
 T DLinkedList<T>::extractNode(size_t ext_pos) {
 	if (ext_pos >= size_)
@@ -333,6 +345,7 @@ T DLinkedList<T>::extractNode(size_t ext_pos) {
 	}
 	return data;
 }
+
 template<typename T>
 void DLinkedList<T>::print() {
 	if (size_ == 0)

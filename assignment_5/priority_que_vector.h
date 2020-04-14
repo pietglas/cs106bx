@@ -10,7 +10,7 @@ namespace pqueue {
 class PQueueVector : public PQueue {
 public:
 	PQueueVector() {}
-	virtual ~PQueueVector() {} 		// 'virtual' prevents undefined behaviour 
+	~PQueueVector() {} 		
 	void enqueue(const std::string& elem) override;
 	std::string extractMin() override;
 	const std::string& peek() override;

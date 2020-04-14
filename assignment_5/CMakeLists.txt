@@ -12,6 +12,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_library(vector priority_que_vector.cpp)
 add_library(heap priority_que_heap.cpp)
+add_library(dllist priority_que_dllist.cpp)
 
 add_executable(main main.cpp)
-target_link_libraries(main vector heap)
+target_link_libraries(main vector heap dllist)
