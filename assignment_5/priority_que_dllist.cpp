@@ -9,7 +9,8 @@ using std::string;
 
 namespace pqueue {
 
-PQueueDLList*& PQueueDLList::merge(PQueueDLList*& one, PQueueDLList*& two){
+// the following is too slow, we should implement a merge sort algorithm to obtain linear time 
+PQueueDLList*& PQueueDLList::merge(PQueueDLList*& one, PQueueDLList*& two) {
 	if (one->empty() || one == nullptr)
 		return two;
 	else if (two->empty() || two == nullptr)
@@ -18,12 +19,19 @@ PQueueDLList*& PQueueDLList::merge(PQueueDLList*& one, PQueueDLList*& two){
 		// if not declared static, the program crashes with segmentation fault
 		static PQueueDLList* merged = new PQueueDLList;  // custom copy constructor needed?
 		size_t size_one = one->size_;
-		for (size_t pos = 0; pos < size_one; pos++) 
-			merged->enqueue(one->extractMin());	
-
 		size_t size_two = two->size_;
-		for(size_t pos1 = 0; pos1 < size_two; pos1++)
-			merged->enqueue(two->extractMin());
+		for (size_t pos = 0; pos < size_one + size_two ; pos++) {
+			string elt_one;
+			string elt_two;
+			if (!one->empty())
+				elt_one = one->peek();
+			if (!two->empty())
+				elt_two = two->peek();
+			if (two->empty() || elt_one <= elt_two)
+				merged->enqueue(one->extractMin());
+			else
+				merged->enqueue(two->extractMin());
+		}	
 		// delete one;		// causes undefined behaviour
 		// delete two
 
@@ -31,6 +39,8 @@ PQueueDLList*& PQueueDLList::merge(PQueueDLList*& one, PQueueDLList*& two){
 	}
 }
 
+
+// add new string to the list. linear runtime. 
 void PQueueDLList::enqueue(const std::string& elem) {
 	if (size_ == 0) 
 		list_.addFront(elem);
@@ -51,12 +61,14 @@ void PQueueDLList::enqueue(const std::string& elem) {
 	size_ = list_.getSize();
 }
 
+// remove the element with the highest priority from the list. Constant runtime. 
 std::string PQueueDLList::extractMin() {
 	string extracted_elt = list_.extractFront();
 	size_ = list_.getSize();
 	return extracted_elt;
 }
 
+// see which element has the highest priority. constant runtime. 
 const std::string& PQueueDLList::peek() {
 	return list_.getFront();
 } 
