@@ -15,6 +15,7 @@ struct HuffNode {
 	HuffNode* one;
 };
 
+// Container for the subtrees with which we build the Huffman Tree
 class PartHuffTree {
 public:
 	PartHuffTree(char character, int amount);
@@ -23,23 +24,26 @@ public:
 	size_t getRootAmount() const;
 	static std::unique_ptr<PartHuffTree>& merge(PartHuffTree& first, PartHuffTree& second);
 	void erase();
-	
+
 private:
 	HuffNode* root_;
 	size_t size_;
 	friend class HuffTree;
 };
 
+
+// Class that constructs a Huffman tree and encodes/decodes a file
 class HuffTree {
 public:
 	HuffTree();
 	~HuffTree();
 
-	void encodeFile(std::string& file_name);
-	const std::map<char, std::string> getEncoding() const;
+	void countChars(std::string& file_name);
+	void encodeTree();
+	void encodeText() const;
 
 private:
-	PartHuffTree tree_;
+	std::unique_ptr<PartHuffTree> tree_;
 	std::map<char, int> char_occurrences_;
 	std::map<char, std::string> encoding_map_;
 };

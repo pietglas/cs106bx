@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <fstream>
+#include <queue>
 #include <string>
 #include "hufftree.h"
 
@@ -44,12 +46,46 @@ void PartHuffTree::erase(HuffNode*& node=root_) {
 
 
 
-void HuffTree::encodeFile(std::string& file_name) {
-
+void HuffTree::countChars(std::string& file_name) {
+    std::ifstream textfile(file_name);
+    if (!textfile) {
+        cout << "An error occurred, maybe the pathfile is wrong?" << endline;
+    }
+    else {
+        char character = '';
+        while (textfile.get(character)) {
+            if (!char_occurrences_.try_emplace(std::make_pair(character, 1)).second)
+                ++char_occurrences_.[character];
+        }
+    }
 }
 
-const std::map<char, std::string> HuffTree::getEncoding() const {
+void HuffTree::encodeTree() {
+    //PQueueHeap pqueue;  // to do: overload <, ==, >= for PartHuffTree, template PQueueHeap
+    std::priority_queue<PartHuffTree> pqueue;
+    for (auto& pair : char_occurrences_) {
+        PartHuffTree new_tree{pair.first, pair.second};
+        pqueue.emplace(new_tree);
+    }
+    while (pqueue.size() > 1) {
+        std::unique_ptr<PartHuffTree> tree_ptr;
+        PartHuffTree first_elt = pqueue.top();
+        pqueue.pop();
+        PartHuffTree second_elt = pqueue.top();
+        pqueue.pop();
+        tree_ptr = PartHuffTree::merge(first_elt, second_elt);
+        pqueue.emplace(*tree_ptr);
+    }
+    tree_ = pqueue.top();
+}
 
+void HuffTree::encodeText() const {
+    // 1. create a map with the encoding of each character, provided by the
+    // Huffman Tree
+    //
+    // 2. create a string representing the text
+    //
+    // 3. convert blocks of 8 'bits' to a byte, write those bytes to binary file.
 }
 
 
