@@ -44,10 +44,14 @@ public:
 	unsigned char convertBitstringToChar(std::string byte);
 	void makeEncodeTree();
 	void makeEncodeMap();
-	void encodeText() const;
+	void encodeText();
+	void safeEncodedText() const;
+	std::string retrieveEncodedText();
 
 private:
 	PartHuffTree tree_;
+	std::string text_ = "";
+	std::string encoded_text_ = "";
 	std::map<char, int> char_occurrences_;
 	std::map<char, std::string> encoding_map_;
 };
