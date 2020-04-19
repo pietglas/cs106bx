@@ -28,6 +28,7 @@ public:
 private:
 	HuffNode* root_;
 	size_t size_;
+	
 	friend class HuffTree;
 };
 
@@ -39,11 +40,14 @@ public:
 	~HuffTree();
 
 	void countChars(std::string& file_name);
-	void encodeTree();
+	std::string convertCharToBitstring(unsigned char nr);
+	unsigned char convertBitstringToChar(std::string byte);
+	void makeEncodeTree();
+	void makeEncodeMap();
 	void encodeText() const;
 
 private:
-	std::unique_ptr<PartHuffTree> tree_;
+	PartHuffTree tree_;
 	std::map<char, int> char_occurrences_;
 	std::map<char, std::string> encoding_map_;
 };

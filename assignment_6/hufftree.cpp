@@ -60,7 +60,30 @@ void HuffTree::countChars(std::string& file_name) {
     }
 }
 
-void HuffTree::encodeTree() {
+std::string HuffTree::convertCharToBitstring(unsigned char nr) {
+    int value = (int)nr;
+    std::string byte = "";
+    for (int i = 7; i != -1; i--) {
+        if (value - (int)pow(2, i) >= 0) {
+            byte += '1';
+            value -= (int)pow(2, i);
+        }
+        else
+            byte += '0';
+    }
+    return byte;
+}
+
+unsigned char HuffTree::convertBitstringToChar(std::string byte) {
+    unsigned char c = 0;
+    for (int i = 0; i != 8; i++) {
+        c <<= 1;
+        if (byte[i] == '1') c |= 1;
+    }
+    return c;
+}
+
+void HuffTree::makeEncodeTree() {
     //PQueueHeap pqueue;  // to do: overload <, ==, >= for PartHuffTree, template PQueueHeap
     std::priority_queue<PartHuffTree> pqueue;
     for (auto& pair : char_occurrences_) {
@@ -77,6 +100,16 @@ void HuffTree::encodeTree() {
         pqueue.emplace(*tree_ptr);
     }
     tree_ = pqueue.top();
+}
+
+void HuffTree::makeEncodeMap() {
+    HuffNode* ctr = tree_.root_;
+    std::string bits = "";
+    if (ctr->one == nullptr && ctr->two == nullptr) 
+        encoding_map_.emplace(std::make_pair(ctr->character, bits));
+    else {
+        
+    }
 }
 
 void HuffTree::encodeText() const {
