@@ -105,10 +105,21 @@ void HuffTree::makeEncodeTree() {
 void HuffTree::makeEncodeMap() {
     HuffNode* ctr = tree_.root_;
     std::string bits = "";
-    if (ctr->one == nullptr && ctr->two == nullptr) 
+    if (ctr->one == nullptr && ctr->zero == nullptr) 
         encoding_map_.emplace(std::make_pair(ctr->character, bits));
     else {
-        
+        if (ctr->one != nullptr) {
+            ctr = ctr->one;
+            bits += '1';
+            HuffTree::makeEncodeMap();
+            bits -= '1';
+        }
+        if (ctr->zero != nullptr) {
+            ctr = ctr->zero;
+            bits += '0';
+            HuffTree::makeEncodeMap();
+            bits -= '0';
+        }
     }
 }
 
