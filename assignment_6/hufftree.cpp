@@ -66,6 +66,24 @@ bool operator <=(const PartHuffTree& lhs, const PartHuffTree& rhs) {
         return false;
 }
 
+void PartHuffTree::print(NuffNode* node)) const {
+    if (node->zero == nullptr && node->one == nullptr) {
+        cout << "character: " << node->character << endl;
+        cout << "size: " << node->amount << endl;
+    }
+    else {
+        if (node->zero != nullptr) {
+            cout << "character: " << node->character << endl;
+            cout << "size: " << node->amount << endl;
+            PartHuffTree::print(node->zero);
+        }
+        if (node->one != nullptr) {
+            cout << "character: " << node->character << endl;
+            cout << "size: " << node->amount << endl;
+            PartHuffTree::print(node->one);
+        }
+    }
+}
 
 
 

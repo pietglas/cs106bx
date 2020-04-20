@@ -33,6 +33,7 @@ public:
 private:
 	HuffNode* root_ = nullptr;
 	size_t size_;
+	void print(NuffNode* node) const;
 };
 
 
