@@ -1,8 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <fstream>
+#include <cstdio>
 #include <queue>
+#include <fstream>
 #include <cmath>
 #include <string>
 #include "hufftree.h"
@@ -26,7 +27,7 @@ PartHuffTree::~PartHuffTree() {
 
 size_t PartHuffTree::getRootAmount() const {return root_->amount;}
 
-std::unique_ptr<PartHuffTree>& merge(PartHuffTree& first, 
+std::unique_ptr<PartHuffTree>& merge(PartHuffTree& first,
                                                           PartHuffTree& second) {
 	std::unique_ptr<PartHuffTree> new_tree(new PartHuffTree('\0', 0));
 	new_tree->root_->amount = first.root_->amount + second.root_->amount;
@@ -44,12 +45,33 @@ void PartHuffTree::erase(HuffNode*& node) {
 	}
 }
 
+bool operator <(const PartHuffTree& lhs, const PartHuffTree& rhs) {
+    if (lhs.root_->amount < rhs.root_->amount)
+        return true;
+    else
+        return false;
+}
+
+bool operator ==(const PartHuffTree& lhs, const PartHuffTree& rhs) {
+    if (lhs.root_->amount == rhs.root_->amount)
+        return true;
+    else
+        return false;
+}
+
+bool operator <=(const PartHuffTree& lhs, const PartHuffTree& rhs) {
+    if (lhs < rhs || lhs == rhs)
+        return true;
+    else
+        return false;
+}
+
 
 
 
 // Count how often each character occurs in a particular text, save
-// as key-value pair in a dictionary. Save the text in a string. 
-void HuffmanCompress::countChars(std::string& file_name) {
+// as key-value pair in a dictionary. Save the text in a string.
+void HuffmanCompress::countChars(const std::string& file_name) {
     std::ifstream textfile(file_name);
     if (!textfile) {
         cout << "An error occurred, maybe the pathfile is wrong?" << endl;
@@ -81,7 +103,7 @@ std::string HuffmanCompress::convertCharToBitstring(unsigned char nr) const {
     return byte;
 }
 
-// convert a string representing a byte (for instance, "01001001") 
+// convert a string representing a byte (for instance, "01001001")
 // to an actual byte
 unsigned char HuffmanCompress::convertBitstringToChar(std::string byte) const {
     unsigned char c = 0;
@@ -94,10 +116,10 @@ unsigned char HuffmanCompress::convertBitstringToChar(std::string byte) const {
 
 // use the character count to generate a Huffman tree
 void HuffmanCompress::makeEncodeTree() {
-    // PQueueHeap pqueue;  // to do: overload <, ==, >= for PartHuffTree, 
+    // PQueueHeap pqueue;  // to do: overload <, ==, >= for PartHuffTree,
     // template PQueueHeap
-    
-    std::priority_queue<PartHuffTree> pqueue;   // need to overload < operator
+
+    std::priority_queue<PartHuffTree> pqueue;
     for (auto& pair : char_occurrences_) {
         PartHuffTree new_tree{pair.first, pair.second};
         pqueue.emplace(new_tree);
@@ -138,6 +160,7 @@ void HuffmanCompress::makeEncodeDecodeMaps() {
     }
 }
 
+// encode the text, safe in member string encoded_text_
 void HuffmanCompress::encodeText() {
     // convert text to a string of 0's and 1's, using Huffman encoding
     for (auto& character : text_) {
@@ -150,14 +173,22 @@ void HuffmanCompress::encodeText() {
         encoded_text_ += '0';
 }
 
+// get the encoding for the text by using private methods
+void HuffmanCompress::getEncoding(const std::string& file_name) {
+    HuffmanCompress::countChars(file_name);
+    HuffmanCompress::makeEncodeTree();
+    HuffmanCompress::makeEncodeDecodeMaps();
+    HuffmanCompress::encodeText();
+}
+
 // Encode the text using our dictionary and save it to a binary file
-void HuffmanCompress::safeEncodedText(std::string compressed_file_name) const {
+void HuffmanCompress::safeEncodedText(const char* compressed_file_name) const {
     std::queue<char> characters;
     // reserve memory for the encoded text
     size_t size_file = encoded_text_.size() / 8;
     unsigned char * encoded_text_as_bytes = new unsigned char [size_file];
     // keep track of the index
-    size_t ctr = 0;    
+    size_t ctr = 0;
     for (auto& bit : encoded_text_) {
         characters.push(bit);
         // if we added 8 'bits' to the queue, make a new byte
@@ -175,30 +206,31 @@ void HuffmanCompress::safeEncodedText(std::string compressed_file_name) const {
         }
     }
     // write the bytes to a binary file
-    std::ofstream compressed_file(compressed_file_name, std::ios::binary);
-    if (compressed_file) 
-        compressed_file.write(encoded_text_as_bytes, size_file);
-    else 
+    if (std::FILE* compressed_file = std::fopen(compressed_file_name, "wb")) {
+        std::fwrite(encoded_text_as_bytes, 1, size_file, compressed_file);
+        std::fclose(compressed_file);
+    }
+    else
         cout << "an error occured when trying to open the new file" << endl;
 
     // free the memory
     delete[] encoded_text_as_bytes;
 }
 
-std::string HuffmanCompress::decodeText(std::string compressed_file_name) {
-    std::ifstream compressed_file(compressed_file_name, std::ios::binary,
-                                  std::ios::ate);
-    if (compressed_file) {
-        // read the data into an array
-        size_t size_file = compressed_file.tellg();
+std::string HuffmanCompress::decodeText(const char* compressed_file_name) {
+    if (std::FILE* compressed_file = std::fopen(compressed_file_name, "rb")) {
+        // seek end to get the size of the file and allocate memory
+        std::fseek(compressed_file, 0, SEEK_END);
+        size_t size_file = std::ftell(compressed_file);
         unsigned char * encoded_text_as_bytes = new unsigned char [size_file];
-        compressed_file.seekg(0, std::ios::beg);
-        compressed_file.read(encoded_text_as_bytes, size_file);
-
+        // seek to start and read from file
+        std::fseek(compressed_file, 0, SEEK_SET);
+        std::fread(encoded_text_as_bytes, 1, size_file, compressed_file);
+        std::fclose(compressed_file);
         // convert data to a string
         std::string encoded_text = "";
         for (size_t i = 0; i != size_file; i++)
-            encoded_text += 
+            encoded_text +=
                 HuffmanCompress::convertCharToBitstring(encoded_text_as_bytes[i]);
 
         delete[] encoded_text_as_bytes;

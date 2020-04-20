@@ -22,15 +22,17 @@ public:
 	~PartHuffTree();
 
 	size_t getRootAmount() const;
-	friend std::unique_ptr<PartHuffTree>& merge(PartHuffTree& first, 
+	friend std::unique_ptr<PartHuffTree>& merge(PartHuffTree& first,
 												PartHuffTree& second);
 	void erase(HuffNode*& node);
 
+    friend class HuffmanCompress;
+	friend bool operator <(const PartHuffTree& lhs, const PartHuffTree& rhs);
+	friend bool operator ==(const PartHuffTree& lhs, const PartHuffTree& rhs);
+	friend bool operator <=(const PartHuffTree& lhs, const PartHuffTree& rhs);
 private:
 	HuffNode* root_ = nullptr;
 	size_t size_;
-	
-	friend class HuffmanCompress;
 };
 
 
@@ -40,19 +42,14 @@ public:
 	HuffmanCompress();
 	~HuffmanCompress();
 
-	void countChars(std::string& file_name);
-	std::string convertCharToBitstring(unsigned char nr) const;
-	unsigned char convertBitstringToChar(std::string byte) const;
-	void makeEncodeTree();
-	void makeEncodeDecodeMaps();
-	void encodeText();
-	void safeEncodedText(std::string compressed_file_name) const;
+	void getEncoding(const std::string& file_name);
+	void safeEncodedText(const char* compressed_file_name) const;
 
 	// retrieve the original text from the compressed file as a string.
 	// note: since this class goes out of scope when the program has finished,
-	// we need to save the encoding map somehow, otherwise we can't 
-	// decode the compressed file. 
-	std::string decodeText(std::string compressed_file_name);
+	// we need to save the encoding map somehow, otherwise we can't
+	// decode the compressed file.
+	std::string decodeText(const char* compressed_file_name);
 
 private:
 	PartHuffTree tree_;
@@ -61,6 +58,13 @@ private:
 	std::map<char, int> char_occurrences_;
 	std::map<char, std::string> encoding_map_;
 	std::map<std::string, char> decoding_map_;
+
+	void countChars(const std::string& file_name);
+	std::string convertCharToBitstring(unsigned char nr) const;
+	unsigned char convertBitstringToChar(std::string byte) const;
+	void makeEncodeTree();
+	void makeEncodeDecodeMaps();
+	void encodeText();
 };
 
 }	// end namespace adt;
