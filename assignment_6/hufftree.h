@@ -18,31 +18,40 @@ struct HuffNode {
 // Container for the subtrees with which we build the Huffman Tree
 class PartHuffTree {
 public:
+	// Special members, according to rule of three
 	PartHuffTree(char character, int amount);
 	~PartHuffTree();
+	PartHuffTree::PartHuffTree(const PartHuffTree& rhs);
+	PartHuffTree& operator = (const PartHuffTree& rhs);
 
 	size_t getRootAmount() const;
+	size_t getSize() const;
 	friend std::unique_ptr<PartHuffTree>& merge(PartHuffTree& first,
 												PartHuffTree& second);
-	void erase(HuffNode*& node);
 
+	// HuffmanCompress is a friend, so it can acces private members
     friend class HuffmanCompress;
+    // overload boolean operators, so we can put the trees in ordered collections
 	friend bool operator <(const PartHuffTree& lhs, const PartHuffTree& rhs);
-	friend bool operator ==(const PartHuffTree& lhs, const PartHuffTree& rhs);
 	friend bool operator <=(const PartHuffTree& lhs, const PartHuffTree& rhs);
 private:
 	HuffNode* root_ = nullptr;
-	size_t size_;
-	void print(NuffNode* node) const;
+	size_t size_ = 0;
+	
+	// print function for debugging purposes
+	void print(HuffNode* node) const;
+	// helper functions for copy constructor/assignment and destructor 
+	void PartHuffTree::copy(const HuffNode*& node);
+	void erase(HuffNode*& node);
+	HuffNode* getRoot() const;
 };
 
 
 // Class that constructs a Huffman tree and encodes/decodes a file
 class HuffmanCompress {
 public:
-	HuffmanCompress();
-	~HuffmanCompress();
-
+	HuffmanCompress() {}
+	
 	void getEncoding(const std::string& file_name);
 	void safeEncodedText(const char* compressed_file_name) const;
 
@@ -53,7 +62,7 @@ public:
 	std::string decodeText(const char* compressed_file_name);
 
 private:
-	PartHuffTree tree_;
+	PartHuffTree tree_('\0', 0);
 	std::string text_ = "";
 	std::string encoded_text_ = "";
 	std::map<char, int> char_occurrences_;

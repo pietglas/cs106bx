@@ -25,6 +25,16 @@ PartHuffTree::~PartHuffTree() {
 	PartHuffTree::erase(root_);
 }
 
+PartHuffTree::PartHuffTree(const PartHuffTree& rhs) {
+    bool at_root = true;
+    PartHuffTree::copy(rhs.getRoot(), at_root);
+    size_ = rhs.getSize();
+}
+
+size_t getSize() const {
+    return size_;
+}
+
 size_t PartHuffTree::getRootAmount() const {return root_->amount;}
 
 std::unique_ptr<PartHuffTree>& merge(PartHuffTree& first,
@@ -37,6 +47,23 @@ std::unique_ptr<PartHuffTree>& merge(PartHuffTree& first,
 	return new_tree;
 }
 
+void PartHuffTree::copy(const HuffNode*& node, bool& at_root) {
+    if (node != nullptr) {
+        HuffNode* new_node = new HuffNode;
+        new_node->character = node->character;
+        new_node->amount = node->amount;
+        new_node->zero = node->zero;
+        new_node->one = node->one;
+        // if we are at the root, let root_ point to it
+        if (root) {
+            root_ = new_node;
+            root = false;
+        }
+        PartHuffTree::copy(node->zero, root);
+        PartHuffTree::copy(node->one, root);
+    }
+}
+
 void PartHuffTree::erase(HuffNode*& node) {
 	if (node != nullptr) {
 		PartHuffTree::erase(node->zero);
@@ -45,15 +72,14 @@ void PartHuffTree::erase(HuffNode*& node) {
 	}
 }
 
-bool operator <(const PartHuffTree& lhs, const PartHuffTree& rhs) {
-    if (lhs.root_->amount < rhs.root_->amount)
-        return true;
-    else
-        return false;
+PartHuffTree& PartHuffTree::operator =(const PartHuffTree& rhs) {
+    bool at_root = true;
+    PartHuffTree::copy(rhs.getRoot(), at_root);
+    size_ = rhs.getSize();
 }
 
-bool operator ==(const PartHuffTree& lhs, const PartHuffTree& rhs) {
-    if (lhs.root_->amount == rhs.root_->amount)
+bool operator <(const PartHuffTree& lhs, const PartHuffTree& rhs) {
+    if (lhs.root_->amount < rhs.root_->amount)
         return true;
     else
         return false;
@@ -66,7 +92,7 @@ bool operator <=(const PartHuffTree& lhs, const PartHuffTree& rhs) {
         return false;
 }
 
-void PartHuffTree::print(NuffNode* node)) const {
+void PartHuffTree::print(HuffNode* node) const {
     if (node->zero == nullptr && node->one == nullptr) {
         cout << "character: " << node->character << endl;
         cout << "size: " << node->amount << endl;
@@ -85,6 +111,10 @@ void PartHuffTree::print(NuffNode* node)) const {
     }
 }
 
+HuffNode* getRoot() const {
+    return root_;
+}
+
 
 
 // Count how often each character occurs in a particular text, save
@@ -97,10 +127,9 @@ void HuffmanCompress::countChars(const std::string& file_name) {
     else {
         char character = '\0';
         while (textfile.get(character)) {
-            if (!char_occurrences_.try_emplace(character, 1).second) {
+            if (!char_occurrences_.try_emplace(character, 1).second) 
                 ++char_occurrences_[character];
-                text_ += character;     // save text as a string
-            }
+            text_ += character;     // save text as a string (not good for large files..)
         }
     }
 }
@@ -148,7 +177,7 @@ void HuffmanCompress::makeEncodeTree() {
         pqueue.pop();
         PartHuffTree second_elt = pqueue.top();
         pqueue.pop();
-        tree_ptr = std::move(merge(first_elt, second_elt));    // uses copy constructor
+        tree_ptr = std::move(merge(first_elt, second_elt));    // uses move constructor
         pqueue.emplace(*tree_ptr);
     }
     tree_ = pqueue.top();
