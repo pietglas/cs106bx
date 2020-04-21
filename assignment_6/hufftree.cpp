@@ -27,27 +27,18 @@ PartHuffTree::~PartHuffTree() {
 
 PartHuffTree::PartHuffTree(const PartHuffTree& rhs) {
     bool at_root = true;
-    PartHuffTree::copy(rhs.getRoot(), at_root);
+    HuffNode* rhs_root = rhs.getRoot();
+    PartHuffTree::copy(rhs_root, at_root);
     size_ = rhs.getSize();
 }
 
-size_t getSize() const {
+size_t PartHuffTree::getSize() const {
     return size_;
 }
 
 size_t PartHuffTree::getRootAmount() const {return root_->amount;}
 
-std::unique_ptr<PartHuffTree>& merge(PartHuffTree& first,
-                                                          PartHuffTree& second) {
-	std::unique_ptr<PartHuffTree> new_tree(new PartHuffTree('\0', 0));
-	new_tree->root_->amount = first.root_->amount + second.root_->amount;
-	new_tree->root_->zero = first.root_;
-	new_tree->root_->one = second.root_;
-
-	return new_tree;
-}
-
-void PartHuffTree::copy(const HuffNode*& node, bool& at_root) {
+void PartHuffTree::copy(HuffNode*& node, bool& at_root) {
     if (node != nullptr) {
         HuffNode* new_node = new HuffNode;
         new_node->character = node->character;
@@ -55,31 +46,42 @@ void PartHuffTree::copy(const HuffNode*& node, bool& at_root) {
         new_node->zero = node->zero;
         new_node->one = node->one;
         // if we are at the root, let root_ point to it
-        if (root) {
+        if (at_root) {
             root_ = new_node;
-            root = false;
+            at_root = false;
         }
-        PartHuffTree::copy(node->zero, root);
-        PartHuffTree::copy(node->one, root);
+        PartHuffTree::copy(node->zero, at_root);
+        PartHuffTree::copy(node->one, at_root);
     }
 }
 
 void PartHuffTree::erase(HuffNode*& node) {
 	if (node != nullptr) {
-		PartHuffTree::erase(node->zero);
-		PartHuffTree::erase(node->one);
-		delete node;
+        HuffNode* node_zero = node->zero;
+        HuffNode* node_one = node->one;
+        delete node;
+        node = nullptr;     // dereference pointer, for print()
+		PartHuffTree::erase(node_zero);
+		PartHuffTree::erase(node_one);
 	}
 }
 
 PartHuffTree& PartHuffTree::operator =(const PartHuffTree& rhs) {
     bool at_root = true;
-    PartHuffTree::copy(rhs.getRoot(), at_root);
+    HuffNode* rhs_root = rhs.getRoot();
+    PartHuffTree::copy(rhs_root, at_root);
     size_ = rhs.getSize();
 }
 
 bool operator <(const PartHuffTree& lhs, const PartHuffTree& rhs) {
     if (lhs.root_->amount < rhs.root_->amount)
+        return true;
+    else
+        return false;
+}
+
+bool operator ==(const PartHuffTree& lhs, const PartHuffTree& rhs) {
+    if (lhs.root_->amount == rhs.root_->amount)
         return true;
     else
         return false;
@@ -93,26 +95,26 @@ bool operator <=(const PartHuffTree& lhs, const PartHuffTree& rhs) {
 }
 
 void PartHuffTree::print(HuffNode* node) const {
-    if (node->zero == nullptr && node->one == nullptr) {
+    if (node != nullptr) {
         cout << "character: " << node->character << endl;
         cout << "size: " << node->amount << endl;
-    }
-    else {
-        if (node->zero != nullptr) {
-            cout << "character: " << node->character << endl;
-            cout << "size: " << node->amount << endl;
-            PartHuffTree::print(node->zero);
-        }
-        if (node->one != nullptr) {
-            cout << "character: " << node->character << endl;
-            cout << "size: " << node->amount << endl;
-            PartHuffTree::print(node->one);
-        }
+        PartHuffTree::print(node->zero);
+        PartHuffTree::print(node->one);
     }
 }
 
-HuffNode* getRoot() const {
+HuffNode* PartHuffTree::getRoot() const {
     return root_;
+}
+
+std::shared_ptr<PartHuffTree> mergeTrees(PartHuffTree& first,
+                                                          PartHuffTree& second) {
+    std::shared_ptr<PartHuffTree> new_tree = std::make_shared<PartHuffTree>('\0', 0);
+    new_tree->root_->amount = first.root_->amount + second.root_->amount;
+    new_tree->root_->zero = first.root_;
+    new_tree->root_->one = second.root_;
+
+    return new_tree;
 }
 
 
@@ -172,12 +174,12 @@ void HuffmanCompress::makeEncodeTree() {
         pqueue.emplace(new_tree);
     }
     while (pqueue.size() > 1) {
-        std::unique_ptr<PartHuffTree> tree_ptr;
+        std::shared_ptr<PartHuffTree> tree_ptr;
         PartHuffTree first_elt = pqueue.top();
         pqueue.pop();
         PartHuffTree second_elt = pqueue.top();
         pqueue.pop();
-        tree_ptr = std::move(merge(first_elt, second_elt));    // uses move constructor
+        tree_ptr = std::move(mergeTrees(first_elt, second_elt));    // uses move constructor
         pqueue.emplace(*tree_ptr);
     }
     tree_ = pqueue.top();
@@ -259,7 +261,6 @@ void HuffmanCompress::safeEncodedText(const char* compressed_file_name) const {
     }
     else
         cout << "an error occured when trying to open the new file" << endl;
-
     // free the memory
     delete[] encoded_text_as_bytes;
 }
@@ -279,9 +280,7 @@ std::string HuffmanCompress::decodeText(const char* compressed_file_name) {
         for (size_t i = 0; i != size_file; i++)
             encoded_text +=
                 HuffmanCompress::convertCharToBitstring(encoded_text_as_bytes[i]);
-
         delete[] encoded_text_as_bytes;
-
         // convert bitstring to text
         text_ = "";
         std::string word_or_sign;
@@ -297,8 +296,8 @@ std::string HuffmanCompress::decodeText(const char* compressed_file_name) {
         return text_;
     }
     else
-        return std::string("something went wrong");
+        return std::string("couldn't open compressed file");
 }
 
 
-};
+}   // end namespace adt
