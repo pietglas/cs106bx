@@ -26,9 +26,8 @@ PartHuffTree::~PartHuffTree() {
 }
 
 PartHuffTree::PartHuffTree(const PartHuffTree& rhs) {
-    bool at_root = true;
     HuffNode* rhs_root = rhs.getRoot();
-    PartHuffTree::copy(rhs_root, at_root);
+    PartHuffTree::copy(rhs_root, root_);
     size_ = rhs.getSize();
 }
 
@@ -38,20 +37,13 @@ size_t PartHuffTree::getSize() const {
 
 size_t PartHuffTree::getRootAmount() const {return root_->amount;}
 
-void PartHuffTree::copy(HuffNode*& node, bool& at_root) {
-    if (node != nullptr) {
-        HuffNode* new_node = new HuffNode;
-        new_node->character = node->character;
-        new_node->amount = node->amount;
-        new_node->zero = node->zero;
-        new_node->one = node->one;
-        // if we are at the root, let root_ point to it
-        if (at_root) {
-            root_ = new_node;
-            at_root = false;
-        }
-        PartHuffTree::copy(node->zero, at_root);
-        PartHuffTree::copy(node->one, at_root);
+void PartHuffTree::copy(HuffNode*& copyable, HuffNode*& copy) {
+    if (copyable != nullptr) {
+        copy = new HuffNode;
+        copy->character = copyable->character;
+        copy->amount = copyable->amount;
+        PartHuffTree::copy(copyable->zero, copy->zero);
+        PartHuffTree::copy(copyable->one, copy->one);
     }
 }
 
@@ -67,10 +59,10 @@ void PartHuffTree::erase(HuffNode*& node) {
 }
 
 PartHuffTree& PartHuffTree::operator =(const PartHuffTree& rhs) {
-    bool at_root = true;
     HuffNode* rhs_root = rhs.getRoot();
-    PartHuffTree::copy(rhs_root, at_root);
+    PartHuffTree::copy(rhs_root, root_);
     size_ = rhs.getSize();
+    return *this;
 }
 
 bool operator <(const PartHuffTree& lhs, const PartHuffTree& rhs) {
@@ -113,7 +105,7 @@ std::shared_ptr<PartHuffTree> mergeTrees(PartHuffTree& first,
     new_tree->root_->amount = first.root_->amount + second.root_->amount;
     new_tree->root_->zero = first.root_;
     new_tree->root_->one = second.root_;
-
+    new_tree->size_ = first.size_ + second.size_ + 1;
     return new_tree;
 }
 

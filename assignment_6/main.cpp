@@ -12,12 +12,15 @@ int main() {
 	adt::PartHuffTree tree3('c', 1);
 	std::shared_ptr<adt::PartHuffTree> merged = mergeTrees(tree, tree1);
 	adt::PartHuffTree merged_trees = *merged;
+
 	std::shared_ptr<adt::PartHuffTree> merged1 = mergeTrees(merged_trees, tree3);
-	cout << "done!" << endl;
 	adt::HuffNode* root = merged1->getRoot();
 	merged1->print(root);
-	merged1->erase(root);
-	merged1->print(root);
+	
+	adt::PartHuffTree copy_tree = *merged1;
+	adt::HuffNode* copy_root = copy_tree.getRoot();
+	cout << "copied the tree" << endl;
+	copy_tree.print(copy_root);
 
 
 

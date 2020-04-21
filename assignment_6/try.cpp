@@ -3,35 +3,35 @@
 #include <cstdio>
 #include <string>
 #include <cmath>
+#include <map>
 
 using std::cout;	using std::endl;
 
-
-std::string convertCharToBitstring(unsigned char nr) {
-	int value = (int)nr;
-	std::string byte = "";
-	for (int i = 7; i != -1; i--) {
-		if (value - (int)pow(2, i) >= 0) {
-			byte += '1';
-			value -= (int)pow(2, i);
-		}
-		else
-			byte += '0';
-	}
-	return byte;
-}
-
-unsigned char convertBitstringToChar(std::string byte) {
-	unsigned char c = 0;
-	for (int i = 0; i != 8; i++) {
-		c <<= 1;
-		if (byte[i] == '1') c |= 1;
-	}
-	return c;
+std::map<char, int> countChars(const std::string& file_name) {
+    std::string text_;
+    std::map<char, int> char_occurrences_;
+    std::ifstream textfile(file_name);
+    if (!textfile) {
+        cout << "An error occurred, maybe the pathfile is wrong?" << endl;
+    }
+    else {
+        char character = '\0';
+        while (textfile.get(character)) {
+            if (!char_occurrences_.try_emplace(character, 1).second)
+                ++char_occurrences_[character];
+            text_ += character;     // save text as a string
+        }
+    }
+    cout << text_ << endl;
+    return char_occurrences_;
 }
 
 int main() {
 	
+	std::map<char, int> chars = countChars("sometext.txt");
+	for (auto& letter: chars) 
+		cout << letter.first << ", " << letter.second << endl;
+
 
 	// if (std::FILE* file = std::fopen("byte.bin", "wb")) {
 	// 	if (std::fwrite(&c, sizeof(c), 1, file))
@@ -47,5 +47,5 @@ int main() {
 	// 	std::fclose(file1);
 	// }
 	
-	
+
 }

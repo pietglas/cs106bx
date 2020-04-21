@@ -9,10 +9,10 @@
 namespace adt {
 
 struct HuffNode {
-	char character;
-	int amount;
-	HuffNode* zero;
-	HuffNode* one;
+	char character = '\0';
+	int amount = 0;
+	HuffNode* zero = nullptr;
+	HuffNode* one = nullptr;
 };
 
 // Container for the subtrees with which we build the Huffman Tree
@@ -29,7 +29,7 @@ public:
 	void print(HuffNode* node) const;
 	friend std::shared_ptr<PartHuffTree> mergeTrees(PartHuffTree& first,
                                                           PartHuffTree& second);
-	void copy(HuffNode*& node, bool& at_root);
+	void copy(HuffNode*& copyable, HuffNode*& copy);
 	void erase(HuffNode*& node);
 	HuffNode* getRoot() const;
 	// HuffmanCompress is a friend, so it can acces private members
