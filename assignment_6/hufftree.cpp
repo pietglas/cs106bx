@@ -5,6 +5,7 @@
 #include <queue>
 #include <fstream>
 #include <cmath>
+#include <vector>
 #include <string>
 #include "hufftree.h"
 
@@ -125,6 +126,8 @@ void HuffmanCompress::countChars(const std::string& file_name) {
                 ++char_occurrences_[character];
             text_ += character;     // save text as a string (not good for large files..)
         }
+        // for (auto& letter : char_occurrences_)
+        //     cout << "letter: " << letter.first << ", size: " << letter.second << endl;
     }
 }
 
@@ -159,43 +162,46 @@ unsigned char HuffmanCompress::convertBitstringToChar(std::string byte) const {
 void HuffmanCompress::makeEncodeTree() {
     // PQueueHeap pqueue;  // to do: overload <, ==, >= for PartHuffTree,
     // template PQueueHeap
-
     std::priority_queue<PartHuffTree> pqueue;
     for (auto& pair : char_occurrences_) {
         PartHuffTree new_tree{pair.first, pair.second};
         pqueue.emplace(new_tree);
     }
+    std::vector<std::shared_ptr<PartHuffTree>> tree_ptrs;
+    tree_ptrs.resize(pqueue.size() - 1);
+    size_t ctr = 0;
     while (pqueue.size() > 1) {
-        std::shared_ptr<PartHuffTree> tree_ptr;
         PartHuffTree first_elt = pqueue.top();
         pqueue.pop();
         PartHuffTree second_elt = pqueue.top();
         pqueue.pop();
-        tree_ptr = std::move(mergeTrees(first_elt, second_elt));    // uses move constructor
-        pqueue.emplace(*tree_ptr);
+        tree_ptrs[ctr] = mergeTrees(first_elt, second_elt);    
+        pqueue.emplace(*(tree_ptrs[ctr]));
+        ctr++;
     }
     tree_ = pqueue.top();
 }
 
+PartHuffTree& HuffmanCompress::getTree() {return tree_;}
+
 // Generate an encoding dictionary from the Huffman tree
-void HuffmanCompress::makeEncodeDecodeMaps() {
-    HuffNode* ctr = tree_.root_;
-    std::string bits = "";
-    if (ctr->zero == nullptr && ctr->one == nullptr) {
-        encoding_map_.emplace(std::make_pair(ctr->character, bits));
-        decoding_map_.emplace(std::make_pair(bits, ctr->character));
-    }
-    else {
-        if (ctr->zero != nullptr) {
-            ctr = ctr->zero;
-            bits += '0';
-            HuffmanCompress::makeEncodeDecodeMaps();
-            bits.pop_back();
+void HuffmanCompress::makeEncodeDecodeMaps(HuffNode*& node, std::string& bits) {
+    if (node != nullptr) {
+        if (node->character != '\0') {
+            encoding_map_.emplace(node->character, bits);
+            decoding_map_.emplace(bits, node->character);
         }
-        if (ctr->one != nullptr) {
-            ctr = ctr->one;
+        else {
+            cout << "discover zero" << endl;
+            HuffNode* node_zero = node->zero;
+            bits += '0';
+            HuffmanCompress::makeEncodeDecodeMaps(node_zero, bits);
+            bits.pop_back();
+
+            cout << "discover one" << endl;
+            HuffNode* node_one = node->one;
             bits += '1';
-            HuffmanCompress::makeEncodeDecodeMaps();
+            HuffmanCompress::makeEncodeDecodeMaps(node_one, bits);
             bits.pop_back();
         }
     }
@@ -218,7 +224,8 @@ void HuffmanCompress::encodeText() {
 void HuffmanCompress::getEncoding(const std::string& file_name) {
     HuffmanCompress::countChars(file_name);
     HuffmanCompress::makeEncodeTree();
-    HuffmanCompress::makeEncodeDecodeMaps();
+    std::string bits = "";
+    HuffmanCompress::makeEncodeDecodeMaps(tree_.root_, bits);
     HuffmanCompress::encodeText();
 }
 

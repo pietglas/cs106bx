@@ -52,6 +52,14 @@ private:
 class HuffmanCompress {
 public:
 	HuffmanCompress() {}
+
+	void countChars(const std::string& file_name);
+	std::string convertCharToBitstring(unsigned char nr) const;
+	unsigned char convertBitstringToChar(std::string byte) const;
+	void makeEncodeTree();
+	PartHuffTree& getTree();
+	void makeEncodeDecodeMaps(HuffNode*& node, std::string& bits);
+	void encodeText();
 	
 	void getEncoding(const std::string& file_name);
 	void safeEncodedText(const char* compressed_file_name) const;
@@ -69,13 +77,6 @@ private:
 	std::map<char, int> char_occurrences_;
 	std::map<char, std::string> encoding_map_;
 	std::map<std::string, char> decoding_map_;
-
-	void countChars(const std::string& file_name);
-	std::string convertCharToBitstring(unsigned char nr) const;
-	unsigned char convertBitstringToChar(std::string byte) const;
-	void makeEncodeTree();
-	void makeEncodeDecodeMaps();
-	void encodeText();
 };
 
 }	// end namespace adt;
