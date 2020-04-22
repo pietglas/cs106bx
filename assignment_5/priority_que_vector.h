@@ -1,3 +1,7 @@
+/* Priority queue implemented on the basis of std::vector. 
+ * Performance: enqueue is O(1), the others are are O(n)
+ */
+
 #pragma once
 
 #include <iostream>

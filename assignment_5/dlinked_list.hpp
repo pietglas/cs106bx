@@ -1,9 +1,16 @@
-// Author: Piet Glas, april 2020. 
-//
-// template class for doubly linked list. A doubly linked list is composed of nodes. 
-// A node contains data of type template<T>, and pointers to respectively 
-// the previous and the next node in the list to which the current node is supposed to be linked. 
-// The class contains pointers to the nodes at the front and back of the list as private members.
+/* Author: Piet Glas, april 2020. 
+ *
+ * template class for doubly linked list. A doubly linked list is 
+ * composed of nodes. A node contains data of type template<T>, 
+ * and pointers to respectively the previous and the next node in 
+ * the list to which the current node is supposed to be linked. 
+ * The class contains pointers to the nodes at the front and back 
+ * of the list as private members.
+ *
+ * TODO:
+ * - add move constructor and move assignment operators
+ * - overload boolean comparison operators for Node.
+ */
 
 #pragma once
 
@@ -28,43 +35,32 @@ class DLinkedList {
 public:
 	DLinkedList();
 	DLinkedList(T data);
-
 	DLinkedList(const DLinkedList& rhs);
-
 	~DLinkedList();
 
 	DLinkedList& operator =(const DLinkedList& rhs);
-
 	// TODO: add move constructor and move assignment!
 
 	// getters that return the data
 	size_t getSize() const;
 
 	const T& getFront() const;
-
 	const T& getBack() const;
-
 	const T& getNode(size_t get_pos) const;
 
 	// returns data, allows data to be changed
 	T& setFront();
-
 	T& setBack();
-
 	T& setNode(size_t get_pos);
 
 	// add new node with specified data to the lsit
 	void addFront(const T& data);
-
 	void addBack(const T& data);
-
 	void addNode(const T& data, size_t add_pos);
 
 	// extract nodes from the list, return the data in the removed node
 	T extractFront();
-
 	T extractBack();
-
 	T extractNode(size_t ext_pos);
 
 	// prints the data of the list from front to back
@@ -120,6 +116,7 @@ DLinkedList<T>::DLinkedList(const DLinkedList& rhs) {
 		}
 	}
 }
+
 template<typename T>
 DLinkedList<T>::~DLinkedList() {
 	while (front_->next != nullptr) {
@@ -129,6 +126,9 @@ DLinkedList<T>::~DLinkedList() {
 	// finally we need to delete object pointed to by back_ = front_
 	delete front_;
 }
+
+// copy assignment. Maybe a more efficient implementation would be
+// to just erase lhs and then copy rhs. 
 template<typename T>
 DLinkedList<T>& DLinkedList<T>::operator =(const DLinkedList& rhs) {
 	size_t pos = 0;

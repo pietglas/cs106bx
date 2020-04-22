@@ -1,3 +1,8 @@
+/* Priority queue implemented on the basis of a doubly linked list, see
+ * dlinked_list.hpp for the implementation of a doubly linked list. 
+ * Performance: extractMin and peek are O(1), enqueue and merge are O(n).
+ */ 
+
 #pragma once
 #include<string>
 #include "dlinked_list.hpp"
