@@ -87,22 +87,35 @@ bool operator <=(const PartHuffTree& lhs, const PartHuffTree& rhs) {
         return false;
 }
 
-void PartHuffTree::print(HuffNode* node) const {
+void PartHuffTree::printTree(HuffNode* node) const {
     if (node != nullptr) {
         cout << "character: " << node->character << endl;
         cout << "size: " << node->amount << endl;
-        PartHuffTree::print(node->zero);
-        PartHuffTree::print(node->one);
+        PartHuffTree::printTree(node->zero);
+        PartHuffTree::printTree(node->one);
     }
+}
+
+void PartHuffTree::print() const {
+    PartHuffTree::printTree(root_);
 }
 
 HuffNode* PartHuffTree::getRoot() const {
     return root_;
 }
 
-std::shared_ptr<PartHuffTree> mergeTrees(PartHuffTree& first,
-                                                          PartHuffTree& second) {
-    std::shared_ptr<PartHuffTree> new_tree = std::make_shared<PartHuffTree>('\0', 0);
+// std::shared_ptr<PartHuffTree> mergeTrees(PartHuffTree& first,
+//                                                           PartHuffTree& second) {
+//     std::shared_ptr<PartHuffTree> new_tree = std::make_shared<PartHuffTree>('\0', 0);
+//     new_tree->root_->amount = first.root_->amount + second.root_->amount;
+//     new_tree->root_->zero = first.root_;
+//     new_tree->root_->one = second.root_;
+//     new_tree->size_ = first.size_ + second.size_ + 1;
+//     return new_tree;
+// }
+
+PartHuffTree* mergeTrees(PartHuffTree& first, PartHuffTree& second) {
+    PartHuffTree* new_tree = new PartHuffTree('\0', 0);
     new_tree->root_->amount = first.root_->amount + second.root_->amount;
     new_tree->root_->zero = first.root_;
     new_tree->root_->one = second.root_;
@@ -167,44 +180,54 @@ void HuffmanCompress::makeEncodeTree() {
         PartHuffTree new_tree{pair.first, pair.second};
         pqueue.emplace(new_tree);
     }
-    std::vector<std::shared_ptr<PartHuffTree>> tree_ptrs;
-    tree_ptrs.resize(pqueue.size() - 1);
-    size_t ctr = 0;
     while (pqueue.size() > 1) {
         PartHuffTree first_elt = pqueue.top();
         pqueue.pop();
         PartHuffTree second_elt = pqueue.top();
-        pqueue.pop();
-        tree_ptrs[ctr] = mergeTrees(first_elt, second_elt);    
-        pqueue.emplace(*(tree_ptrs[ctr]));
-        ctr++;
+        pqueue.pop();  
+        pqueue.emplace(*mergeTrees(first_elt, second_elt));
     }
     tree_ = pqueue.top();
 }
 
-PartHuffTree& HuffmanCompress::getTree() {return tree_;}
+void HuffmanCompress::printTree() const {
+    tree_.print();
+}
 
 // Generate an encoding dictionary from the Huffman tree
-void HuffmanCompress::makeEncodeDecodeMaps(HuffNode*& node, std::string& bits) {
+void HuffmanCompress::makeEncodeDecodeMapsHelper(HuffNode*& node, std::string& bits) {
     if (node != nullptr) {
         if (node->character != '\0') {
             encoding_map_.emplace(node->character, bits);
             decoding_map_.emplace(bits, node->character);
         }
         else {
-            cout << "discover zero" << endl;
             HuffNode* node_zero = node->zero;
             bits += '0';
-            HuffmanCompress::makeEncodeDecodeMaps(node_zero, bits);
+            HuffmanCompress::makeEncodeDecodeMapsHelper(node_zero, bits);
             bits.pop_back();
 
-            cout << "discover one" << endl;
             HuffNode* node_one = node->one;
             bits += '1';
-            HuffmanCompress::makeEncodeDecodeMaps(node_one, bits);
+            HuffmanCompress::makeEncodeDecodeMapsHelper(node_one, bits);
             bits.pop_back();
         }
     }
+}
+
+void HuffmanCompress::makeEncodeDecodeMaps() {
+    std::string bits;
+    HuffmanCompress::makeEncodeDecodeMapsHelper(tree_.root_, bits);
+}
+
+void HuffmanCompress::printEncodingMap() const {
+    for (auto& pair : encoding_map_)
+        cout << "letter: " << pair.first << ", bits: " << pair.second << endl;
+}
+
+void HuffmanCompress::printDecodingMap() const {
+    for (auto& pair : decoding_map_)
+        cout << "bits: " << pair.first << ", letter: " << pair.second << endl;
 }
 
 // encode the text, safe in member string encoded_text_
@@ -220,12 +243,15 @@ void HuffmanCompress::encodeText() {
         encoded_text_ += '0';
 }
 
+void HuffmanCompress::printEncodedText() const {
+    cout << encoded_text_ << endl;
+}
+
 // get the encoding for the text by using private methods
 void HuffmanCompress::getEncoding(const std::string& file_name) {
     HuffmanCompress::countChars(file_name);
     HuffmanCompress::makeEncodeTree();
-    std::string bits = "";
-    HuffmanCompress::makeEncodeDecodeMaps(tree_.root_, bits);
+    HuffmanCompress::makeEncodeDecodeMaps();
     HuffmanCompress::encodeText();
 }
 

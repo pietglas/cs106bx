@@ -23,15 +23,14 @@ public:
 	~PartHuffTree();
 	PartHuffTree(const PartHuffTree& rhs);
 	PartHuffTree& operator = (const PartHuffTree& rhs);
-
+	void print() const;
 	size_t getRootAmount() const;
 	size_t getSize() const;
-	void print(HuffNode* node) const;
-	friend std::shared_ptr<PartHuffTree> mergeTrees(PartHuffTree& first,
-                                                          PartHuffTree& second);
-	void copy(HuffNode*& copyable, HuffNode*& copy);
-	void erase(HuffNode*& node);
-	HuffNode* getRoot() const;
+	;
+	// // friend std::shared_ptr<PartHuffTree> mergeTrees(PartHuffTree& first,
+ //                                                          PartHuffTree& second);
+	friend PartHuffTree* mergeTrees(PartHuffTree& first, PartHuffTree& second);
+	
 	// HuffmanCompress is a friend, so it can acces private members
     friend class HuffmanCompress;
     // overload boolean operators, so we can put the trees in ordered collections
@@ -42,9 +41,11 @@ private:
 	HuffNode* root_ = nullptr;
 	size_t size_ = 0;
 	
-	// print function for debugging purposes
-	
-	// helper functions for copy constructor/assignment and destructor 
+	// helper functions for copy constructor/assignment, destructor and print()
+	void copy(HuffNode*& copyable, HuffNode*& copy);
+	void erase(HuffNode*& node);
+	HuffNode* getRoot() const;
+	void printTree(HuffNode* node) const;
 };
 
 
@@ -52,16 +53,21 @@ private:
 class HuffmanCompress {
 public:
 	HuffmanCompress() {}
-
+	// counts how often characters occurs in a text
 	void countChars(const std::string& file_name);
-	std::string convertCharToBitstring(unsigned char nr) const;
-	unsigned char convertBitstringToChar(std::string byte) const;
+	// make the Huffman encoding tree
 	void makeEncodeTree();
-	PartHuffTree& getTree();
-	void makeEncodeDecodeMaps(HuffNode*& node, std::string& bits);
+	void printTree() const;
+	// generate encoding and decoding maps from the Huffman encoding tree
+	void makeEncodeDecodeMaps();
+	void printEncodingMap() const;
+	void printDecodingMap() const;
+	// encode the text string 
 	void encodeText();
+	void printEncodedText() const;
 	
 	void getEncoding(const std::string& file_name);
+
 	void safeEncodedText(const char* compressed_file_name) const;
 
 	// retrieve the original text from the compressed file as a string.
@@ -77,6 +83,10 @@ private:
 	std::map<char, int> char_occurrences_;
 	std::map<char, std::string> encoding_map_;
 	std::map<std::string, char> decoding_map_;
+
+	std::string convertCharToBitstring(unsigned char nr) const;
+	unsigned char convertBitstringToChar(std::string byte) const;
+	void makeEncodeDecodeMapsHelper(HuffNode*& node, std::string& bits);
 };
 
 }	// end namespace adt;
