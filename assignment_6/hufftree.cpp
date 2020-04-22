@@ -87,6 +87,20 @@ bool operator <=(const PartHuffTree& lhs, const PartHuffTree& rhs) {
         return false;
 }
 
+bool operator >(const PartHuffTree& lhs, const PartHuffTree& rhs){
+    if (!(lhs <= rhs))
+        return true;
+    else
+        return false;
+}
+
+bool operator >=(const PartHuffTree& lhs, const PartHuffTree& rhs) {
+    if (!(lhs < rhs))
+        return true;
+    else
+        return false;
+}
+
 void PartHuffTree::printTree(HuffNode* node) const {
     if (node != nullptr) {
         cout << "character: " << node->character << endl;
@@ -175,7 +189,8 @@ unsigned char HuffmanCompress::convertBitstringToChar(std::string byte) const {
 void HuffmanCompress::makeEncodeTree() {
     // PQueueHeap pqueue;  // to do: overload <, ==, >= for PartHuffTree,
     // template PQueueHeap
-    std::priority_queue<PartHuffTree> pqueue;
+    std::priority_queue<PartHuffTree, std::vector<PartHuffTree>,
+                        std::greater<PartHuffTree>> pqueue; // need to reverse ordering
     for (auto& pair : char_occurrences_) {
         PartHuffTree new_tree{pair.first, pair.second};
         pqueue.emplace(new_tree);
@@ -242,9 +257,12 @@ void HuffmanCompress::encodeText() {
     while (encoded_text_.size() % 8 != 0)
         encoded_text_ += '0';
 }
+void HuffmanCompress::printText() const {
+    cout << "original text: " << text_ << endl;
+}
 
 void HuffmanCompress::printEncodedText() const {
-    cout << encoded_text_ << endl;
+    cout << "encoded text: " << encoded_text_ << endl;
 }
 
 // get the encoding for the text by using private methods
@@ -301,17 +319,18 @@ std::string HuffmanCompress::decodeText(const char* compressed_file_name) {
         std::fread(encoded_text_as_bytes, 1, size_file, compressed_file);
         std::fclose(compressed_file);
         // convert data to a string
-        std::string encoded_text = "";
+        std::string encoded_text_ = "";
+        cout << "reset encode text : " << encoded_text_ << endl;
         for (size_t i = 0; i != size_file; i++)
-            encoded_text +=
+            encoded_text_ +=
                 HuffmanCompress::convertCharToBitstring(encoded_text_as_bytes[i]);
         delete[] encoded_text_as_bytes;
         // convert bitstring to text
         text_ = "";
         std::string word_or_sign;
-        for (size_t i = 0; i != encoded_text.size(); i++) {
+        for (size_t i = 0; i != encoded_text_.size(); i++) {
             if (decoding_map_.find(word_or_sign) == decoding_map_.end()) {
-                word_or_sign += encoded_text[i];
+                word_or_sign += encoded_text_[i];
             }
             else {
                 text_ += decoding_map_[word_or_sign];

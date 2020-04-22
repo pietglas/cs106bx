@@ -26,13 +26,21 @@ int main(int argc, char **argv) {
 	
 
 	adt::HuffmanCompress huffman;
-	huffman.countChars(argv[1]);
-	huffman.makeEncodeTree();
-	huffman.printTree();
-	huffman.makeEncodeDecodeMaps();
+	// huffman.countChars(argv[1]);
+	// huffman.makeEncodeTree();
+	// huffman.printTree();
+	// huffman.makeEncodeDecodeMaps();
+	// huffman.printEncodingMap();
+	// huffman.printDecodingMap();
+	// huffman.encodeText();
+	huffman.getEncoding(argv[1]);
+	huffman.printText();
 	huffman.printEncodingMap();
-	huffman.printDecodingMap();
-	huffman.encodeText();
 	huffman.printEncodedText();
-	// huffman.safeEncodedText(argv[2]);
+	huffman.printTree();
+
+	huffman.safeEncodedText(argv[2]);
+	string original_text = huffman.decodeText(argv[2]);
+	huffman.printEncodedText();
+	cout << "retrieved text: " << original_text << endl;
 }

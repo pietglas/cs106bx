@@ -37,6 +37,8 @@ public:
 	friend bool operator <(const PartHuffTree& lhs, const PartHuffTree& rhs);
 	friend bool operator ==(const PartHuffTree& lhs, const PartHuffTree& rhs);
 	friend bool operator <=(const PartHuffTree& lhs, const PartHuffTree& rhs);
+	friend bool operator >(const PartHuffTree& lhs, const PartHuffTree& rhs);
+	friend bool operator >=(const PartHuffTree& lhs, const PartHuffTree& rhs);
 private:
 	HuffNode* root_ = nullptr;
 	size_t size_ = 0;
@@ -64,6 +66,7 @@ public:
 	void printDecodingMap() const;
 	// encode the text string 
 	void encodeText();
+	void printText() const;
 	void printEncodedText() const;
 	
 	void getEncoding(const std::string& file_name);
