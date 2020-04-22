@@ -38,6 +38,7 @@ size_t PartHuffTree::getSize() const {
 
 size_t PartHuffTree::getRootAmount() const {return root_->amount;}
 
+// helper function for copy constructor / assignment
 void PartHuffTree::copy(HuffNode*& copyable, HuffNode*& copy) {
     if (copyable != nullptr) {
         copy = new HuffNode;
@@ -48,6 +49,7 @@ void PartHuffTree::copy(HuffNode*& copyable, HuffNode*& copy) {
     }
 }
 
+// helper function for destructor 
 void PartHuffTree::erase(HuffNode*& node) {
 	if (node != nullptr) {
         HuffNode* node_zero = node->zero;
@@ -101,6 +103,7 @@ bool operator >=(const PartHuffTree& lhs, const PartHuffTree& rhs) {
         return false;
 }
 
+// Helper function for printing
 void PartHuffTree::printTree(HuffNode* node) const {
     if (node != nullptr) {
         cout << "character: " << node->character << endl;
@@ -128,6 +131,8 @@ HuffNode* PartHuffTree::getRoot() const {
 //     return new_tree;
 // }
 
+// merge two trees by adding a new root, making the roots of the 
+// arguments its children
 PartHuffTree* mergeTrees(PartHuffTree& first, PartHuffTree& second) {
     PartHuffTree* new_tree = new PartHuffTree('\0', 0);
     new_tree->root_->amount = first.root_->amount + second.root_->amount;
@@ -153,8 +158,6 @@ void HuffmanCompress::countChars(const std::string& file_name) {
                 ++char_occurrences_[character];
             text_ += character;     // save text as a string (not good for large files..)
         }
-        // for (auto& letter : char_occurrences_)
-        //     cout << "letter: " << letter.first << ", size: " << letter.second << endl;
     }
 }
 
@@ -209,7 +212,8 @@ void HuffmanCompress::printTree() const {
     tree_.print();
 }
 
-// Generate an encoding dictionary from the Huffman tree
+// Helper function for encoding dictionary from the Huffman tree, moving from the 
+// leftmost node to the rightmost node. 
 void HuffmanCompress::makeEncodeDecodeMapsHelper(HuffNode*& node, std::string& bits) {
     if (node != nullptr) {
         if (node->character != '\0') {
@@ -230,6 +234,7 @@ void HuffmanCompress::makeEncodeDecodeMapsHelper(HuffNode*& node, std::string& b
     }
 }
 
+// generates encoding dictionary from the Huffman tree
 void HuffmanCompress::makeEncodeDecodeMaps() {
     std::string bits;
     HuffmanCompress::makeEncodeDecodeMapsHelper(tree_.root_, bits);
@@ -254,8 +259,10 @@ void HuffmanCompress::encodeText() {
         encoded_text_ += value;
     }
     // add 0's until the length of the encoded text is divisibly by 8
-    while (encoded_text_.size() % 8 != 0)
+    while (encoded_text_.size() % 8 != 0) {
         encoded_text_ += '0';
+        ++extra_bits_;
+    }
 }
 void HuffmanCompress::printText() const {
     cout << "original text: " << text_ << endl;
@@ -308,6 +315,8 @@ void HuffmanCompress::safeEncodedText(const char* compressed_file_name) const {
     delete[] encoded_text_as_bytes;
 }
 
+// retrieves the data from the compressed file and returns a string with the
+// original text
 std::string HuffmanCompress::decodeText(const char* compressed_file_name) {
     if (std::FILE* compressed_file = std::fopen(compressed_file_name, "rb")) {
         // seek end to get the size of the file and allocate memory
@@ -319,18 +328,19 @@ std::string HuffmanCompress::decodeText(const char* compressed_file_name) {
         std::fread(encoded_text_as_bytes, 1, size_file, compressed_file);
         std::fclose(compressed_file);
         // convert data to a string
-        std::string encoded_text_ = "";
-        cout << "reset encode text : " << encoded_text_ << endl;
+        std::string encoded_text = "";
         for (size_t i = 0; i != size_file; i++)
-            encoded_text_ +=
+            encoded_text +=
                 HuffmanCompress::convertCharToBitstring(encoded_text_as_bytes[i]);
         delete[] encoded_text_as_bytes;
-        // convert bitstring to text
+        // convert bitstring to text, using decoding_map_
         text_ = "";
         std::string word_or_sign;
-        for (size_t i = 0; i != encoded_text_.size(); i++) {
+        size_t i = 0;
+        while (i != encoded_text.size() - extra_bits_) {
             if (decoding_map_.find(word_or_sign) == decoding_map_.end()) {
-                word_or_sign += encoded_text_[i];
+                word_or_sign += encoded_text[i];
+                i++;
             }
             else {
                 text_ += decoding_map_[word_or_sign];

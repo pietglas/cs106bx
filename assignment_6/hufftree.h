@@ -1,3 +1,15 @@
+/* Contains the declarations of two classes, PartHuffTree and 
+HuffmanCompress, needed for the Huffman compressing algorithm. 
+
+TODO: 
+- see comment at HuffmanCompress::decodeText(). 
+- merge two trees and return a smart pointer instead of a raw
+pointer. Current attempt didn't work, so I implemented the 
+merging with raw pointers. 
+- currently the Huffman tree is generated with a priority queue,
+based on std::vector. This has bad performance (see assignment 5).
+*/
+
 #pragma once
 
 #include <iostream>
@@ -74,19 +86,21 @@ public:
 	void safeEncodedText(const char* compressed_file_name) const;
 
 	// retrieve the original text from the compressed file as a string.
-	// note: since this class goes out of scope when the program has finished,
-	// we need to save the encoding map somehow, otherwise we can't
-	// decode the compressed file.
+	// TODO: save decoding_map_ in the compressed file, otherwise
+	// we can't decode the text later when this class goes out
+	// of scope.
 	std::string decodeText(const char* compressed_file_name);
 
 private:
 	PartHuffTree tree_{'\0', 0};
 	std::string text_ = "";
 	std::string encoded_text_ = "";
+	size_t extra_bits_ = 0;
 	std::map<char, int> char_occurrences_;
 	std::map<char, std::string> encoding_map_;
 	std::map<std::string, char> decoding_map_;
 
+	// some helper functions 
 	std::string convertCharToBitstring(unsigned char nr) const;
 	unsigned char convertBitstringToChar(std::string byte) const;
 	void makeEncodeDecodeMapsHelper(HuffNode*& node, std::string& bits);

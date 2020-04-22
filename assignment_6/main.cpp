@@ -1,3 +1,10 @@
+/* File that runs the Huffman compression algorithm. The filenames for 
+the original file and the compressed file are provided via the terminal.
+the header file contains the class declarations for PartHuffTree 
+and HuffmanCompress. 
+Also contains some testing instances for PartHuffTree.
+*/
+
 #include <iostream>
 #include <string>
 #include <memory>
@@ -30,17 +37,16 @@ int main(int argc, char **argv) {
 	// huffman.makeEncodeTree();
 	// huffman.printTree();
 	// huffman.makeEncodeDecodeMaps();
-	// huffman.printEncodingMap();
-	// huffman.printDecodingMap();
 	// huffman.encodeText();
 	huffman.getEncoding(argv[1]);
 	huffman.printText();
-	huffman.printEncodingMap();
+	// huffman.printEncodingMap();
+	// huffman.printDecodingMap();
+	// huffman.printEncodingMap();
 	huffman.printEncodedText();
-	huffman.printTree();
+	// huffman.printTree();
 
 	huffman.safeEncodedText(argv[2]);
 	string original_text = huffman.decodeText(argv[2]);
-	huffman.printEncodedText();
 	cout << "retrieved text: " << original_text << endl;
 }
