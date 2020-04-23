@@ -62,9 +62,12 @@ void PartHuffTree::erase(HuffNode*& node) {
 }
 
 PartHuffTree& PartHuffTree::operator =(const PartHuffTree& rhs) {
-    HuffNode* rhs_root = rhs.getRoot();
-    PartHuffTree::copy(rhs_root, root_);
-    size_ = rhs.getSize();
+    if (this != &rhs) {
+        PartHuffTree::erase(root_); // sets root_ to nullptr
+        HuffNode* rhs_root = rhs.getRoot();
+        PartHuffTree::copy(rhs_root, root_);
+        size_ = rhs.getSize();
+    }
     return *this;
 }
 

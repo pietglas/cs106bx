@@ -9,6 +9,7 @@
  *
  * TODO:
  * - add move constructor and move assignment operators
+ * - implement copy constructor using recursion
  * - overload boolean comparison operators for Node.
  */
 
@@ -74,6 +75,7 @@ private:
 
 template<typename T>
 DLinkedList<T>::DLinkedList(): size_{0} {}
+
 template<typename T>
 DLinkedList<T>::DLinkedList(T data): size_{1} {
 	front_ = new Node<T>;
@@ -82,6 +84,7 @@ DLinkedList<T>::DLinkedList(T data): size_{1} {
 	front_->next = nullptr;
 	back_ = front_;
 }
+
 template<typename T>
 DLinkedList<T>::DLinkedList(const DLinkedList& rhs) {
 	if (rhs.getSize() == 0)

@@ -14,13 +14,13 @@ using std::cout;	using std::endl;
 using std::string;
 
 int main(int argc, char **argv) {
-	// adt::PartHuffTree tree('a', 1);
-	// adt::PartHuffTree tree1('b', 1);
-	// adt::PartHuffTree tree3('c', 1);
-	// adt::PartHuffTree* merged = mergeTrees(tree, tree1);
-	// merged->print();
-	// cout << endl;
-	// adt::PartHuffTree merged_trees = *merged;
+	adt::PartHuffTree tree('a', 1);
+	adt::PartHuffTree tree1('b', 1);
+	adt::PartHuffTree tree3('c', 1);
+	adt::PartHuffTree* merged = mergeTrees(tree, tree1);
+	merged->print();
+	cout << endl;
+	adt::PartHuffTree merged_trees = *merged;
 
 	// adt::PartHuffTree* merged1 = mergeTrees(merged_trees, tree3);
 	// merged1->print();

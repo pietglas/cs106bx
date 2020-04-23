@@ -8,6 +8,7 @@ pointer. Current attempt didn't work, so I implemented the
 merging with raw pointers. 
 - currently the Huffman tree is generated with a priority queue,
 based on std::vector. This has bad performance (see assignment 5).
+- implement move semantics (i.e. rule of five)
 */
 
 #pragma once
