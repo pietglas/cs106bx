@@ -134,21 +134,23 @@ DLinkedList<T>::~DLinkedList() {
 // to just erase lhs and then copy rhs. 
 template<typename T>
 DLinkedList<T>& DLinkedList<T>::operator =(const DLinkedList& rhs) {
-	size_t pos = 0;
-	for (; pos != std::min(size_, rhs.getSize()); pos++)
-		DLinkedList::setNode(pos) = rhs.getNode(pos);
+	if (this != &rhs) {
+		size_t pos = 0;
+		for (; pos != std::min(size_, rhs.getSize()); pos++)
+			DLinkedList::setNode(pos) = rhs.getNode(pos);
 
-	// if the lists have equal size, skip this block
-	if (size_ != rhs.getSize()) {
-		if (size_ < rhs.getSize()) {
-			while (pos < rhs.getSize()) {
-				DLinkedList::addBack(rhs.getNode(pos));
-				++pos;
+		// if the lists have equal size, skip this block
+		if (size_ != rhs.getSize()) {
+			if (size_ < rhs.getSize()) {
+				while (pos < rhs.getSize()) {
+					DLinkedList::addBack(rhs.getNode(pos));
+					++pos;
+				}
 			}
-		}
-		else {
-			for (int i = 0; i < size_ - rhs.getSize(); i++)
-				DLinkedList::extractNode(pos);
+			else {
+				for (int i = 0; i < size_ - rhs.getSize(); i++)
+					DLinkedList::extractNode(pos);
+			}
 		}
 	}
 	return *this;
