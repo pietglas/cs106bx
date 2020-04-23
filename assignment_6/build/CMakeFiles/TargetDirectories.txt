@@ -1,0 +1,4 @@
+/home/piet/Projects/cs106bx/assignment_6/build/CMakeFiles/rebuild_cache.dir
+/home/piet/Projects/cs106bx/assignment_6/build/CMakeFiles/edit_cache.dir
+/home/piet/Projects/cs106bx/assignment_6/build/CMakeFiles/huffman.dir
+/home/piet/Projects/cs106bx/assignment_6/build/CMakeFiles/main.dir

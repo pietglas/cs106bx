@@ -57,7 +57,7 @@ private:
 	size_t size_ = 0;
 	
 	// helper functions for copy constructor/assignment, destructor and print()
-	void copy(HuffNode*& copyable, HuffNode*& copy);
+	void copy(const HuffNode* copyable, HuffNode*& copy);
 	void erase(HuffNode*& node);
 	HuffNode* getRoot() const;
 	void printTree(HuffNode* node) const;

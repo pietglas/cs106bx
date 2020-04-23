@@ -27,8 +27,8 @@ PartHuffTree::~PartHuffTree() {
 }
 
 PartHuffTree::PartHuffTree(const PartHuffTree& rhs) {
-    HuffNode* rhs_root = rhs.getRoot();
-    PartHuffTree::copy(rhs_root, root_);
+    //HuffNode* rhs_root = rhs.getRoot();
+    PartHuffTree::copy(rhs.root_, root_);
     size_ = rhs.getSize();
 }
 
@@ -39,7 +39,7 @@ size_t PartHuffTree::getSize() const {
 size_t PartHuffTree::getRootAmount() const {return root_->amount;}
 
 // helper function for copy constructor / assignment
-void PartHuffTree::copy(HuffNode*& copyable, HuffNode*& copy) {
+void PartHuffTree::copy(const HuffNode* copyable, HuffNode*& copy) {
     if (copyable != nullptr) {
         copy = new HuffNode;
         copy->character = copyable->character;
@@ -64,8 +64,7 @@ void PartHuffTree::erase(HuffNode*& node) {
 PartHuffTree& PartHuffTree::operator =(const PartHuffTree& rhs) {
     if (this != &rhs) {
         PartHuffTree::erase(root_); // sets root_ to nullptr
-        HuffNode* rhs_root = rhs.getRoot();
-        PartHuffTree::copy(rhs_root, root_);
+        PartHuffTree::copy(rhs.root_, root_);
         size_ = rhs.getSize();
     }
     return *this;

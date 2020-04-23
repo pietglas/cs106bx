@@ -20,7 +20,11 @@ int main(int argc, char **argv) {
 	adt::PartHuffTree* merged = mergeTrees(tree, tree1);
 	merged->print();
 	cout << endl;
-	adt::PartHuffTree merged_trees = *merged;
+	adt::PartHuffTree merged_trees = *merged;	// copies *merged (lvalue!)
+	tree1 = tree3;		// this also changes *merged
+	merged_trees.print();
+	cout << endl;
+	merged->print();
 
 	// adt::PartHuffTree* merged1 = mergeTrees(merged_trees, tree3);
 	// merged1->print();
