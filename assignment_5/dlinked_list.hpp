@@ -59,6 +59,8 @@ public:
 	void addBack(const T& data);
 	void addNode(const T& data, size_t add_pos);
 
+	// helper for destructor and copy assignment
+	T erase(size_t first, size_t last);
 	// extract nodes from the list, return the data in the removed node
 	T extractFront();
 	T extractBack();
@@ -121,17 +123,89 @@ DLinkedList<T>::DLinkedList(const DLinkedList& rhs) {
 }
 
 template<typename T>
-DLinkedList<T>::~DLinkedList() {
-	while (front_->next != nullptr) {
-		front_ = front_->next;	// point to the next object
-		delete front_->prev;		// delete previous front_ object
+T DLinkedList<T>::erase(size_t first, size_t last) {
+	T data;
+	// start removing from first if that is more efficient
+	if (first <= (size_ - last - 1)) {
+		// find position
+		Node<T>* node = front_;
+		size_t pos = 0;
+		for (;pos != first; pos++)
+			node = node->next;
+		// keep track of first node before the ones we are deleting
+		Node<T>* keep_node = nullptr;
+		if (first != 0) {
+			keep_node = node->prev;
+			keep_node->next = nullptr;
+		}
+		// set data
+		data = node->data;
+		// delete nodes
+		for (;pos != last; ++pos) {
+			node = node->next;
+			delete node->prev;
+		}
+		// also delete last node. If first node was not the front, 
+		// we need to reconnect the nodes.
+		if (first != 0) {
+			node = node->next;
+			delete node->prev;
+			keep_node->next = node;
+			node->prev = node;
+		}
+		else if (first == 0 && last != size_ - 1) {
+			front_ = node->next;
+			node->next->prev = nullptr;
+			delete node;
+		}
+		else {
+			delete node;
+			front_ = nullptr;
+			back_ = nullptr;
+		}
 	}
-	// finally we need to delete object pointed to by back_ = front_
-	delete front_;
+	else {
+		Node<T>* node = back_;
+		size_t pos = size_ - 1;
+		for (;pos != last; --pos)
+			node = node->prev;
+		// delete nodes
+		Node<T>* keep_node = nullptr;
+		if (last != size_ - 1) {
+			keep_node = node->next;
+			keep_node->prev = nullptr;
+		}
+		// set data
+		data = node->data;
+		// delete nodes
+		for (;pos != first; --pos) {
+			node = node->prev;
+			delete node->next;
+		}
+		// also delete first node
+		if (last != size_ - 1) {
+			node = node->prev;
+			delete node->next;
+			node->next = keep_node;
+			keep_node->prev = node;
+		}
+		else {
+			back_ = node->prev;
+			node->prev->next = nullptr;
+			delete node;
+		}
+	}
+	size_ -= (last + 1 - first);
+	return data;
 }
 
-// copy assignment. Maybe a more efficient implementation would be
-// to just erase lhs and then copy rhs. 
+template<typename T>
+DLinkedList<T>::~DLinkedList() {
+	DLinkedList<T>::erase(0, size_ - 1);
+}
+
+// copy assignment. Instead of erasing the list first, we copy the data
+// of rhs into the nodes of `*this` as far as we can to avoid calls of `new`
 template<typename T>
 DLinkedList<T>& DLinkedList<T>::operator =(const DLinkedList& rhs) {
 	if (this != &rhs) {
@@ -148,8 +222,7 @@ DLinkedList<T>& DLinkedList<T>::operator =(const DLinkedList& rhs) {
 				}
 			}
 			else {
-				for (int i = 0; i < size_ - rhs.getSize(); i++)
-					DLinkedList::extractNode(pos);
+				DLinkedList<T>::erase(pos, size_ - 1);
 			}
 		}
 	}
@@ -298,30 +371,15 @@ template<typename T>
 T DLinkedList<T>::extractFront() {
 	if (size_ == 0)
 		throw std::out_of_range("nothing to extract, list is empty");
-	Node<T>* get_front = front_;
-	if (size_ > 1) {
-		front_ = front_->next;
-		front_->prev = nullptr;
-	}
-	T data = get_front->data;
-	delete get_front;
-	--size_;
+	T data = DLinkedList<T>::erase(0, 0);
 	return data;
-
 }
 
 template<typename T>
 T DLinkedList<T>::extractBack() {
 	if (size_ == 0)
 		throw std::out_of_range("nothing to extract, list is empty");
-	Node<T>* get_back = back_;
-	if (size_ > 1) {
-		back_ = back_->prev;
-		back_->next = nullptr;
-	}
-	T data = get_back->data;
-	delete get_back;
-	--size_;
+	T data = DLinkedList<T>::erase(size_ - 1, size_ - 1);
 	return data;
 }
 
@@ -329,25 +387,7 @@ template<typename T>
 T DLinkedList<T>::extractNode(size_t ext_pos) {
 	if (ext_pos >= size_)
 		throw std::out_of_range("nothing to extract, out of bounds");
-	T data;
-	if (ext_pos == 0)
-		data = extractFront();
-	else if (ext_pos == size_ - 1)
-		data = extractBack();
-	else {
-		Node<T>* node = front_;
-		size_t pos = 0;
-		while (pos != ext_pos) {
-			node = node->next;
-			++pos;
-		}
-		// decouple the node from the list
-		node->next->prev = node->prev;
-		node->prev->next = node->next;
-		data = node->data;
-		delete node;
-		--size_;
-	}
+	T data = DLinkedList<T>::erase(ext_pos, ext_pos);
 	return data;
 }
 
