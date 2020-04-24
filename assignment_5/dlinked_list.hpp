@@ -26,6 +26,9 @@ namespace adt {
 
 template<typename T>
 struct Node {
+	Node() {}
+	Node(T data, Node<T>* prev, Node<T>* next): 
+		data{data}, prev{prev}, next{next} {}
 	T data;
 	Node<T>* prev;
 	Node<T>* next;
@@ -59,7 +62,7 @@ public:
 	void addBack(const T& data);
 	void addNode(const T& data, size_t add_pos);
 
-	// helper for destructor and copy assignment
+	// helper for destructor, copy assignment and extract methods
 	T erase(size_t first, size_t last);
 	// extract nodes from the list, return the data in the removed node
 	T extractFront();
@@ -70,8 +73,8 @@ public:
 	void print();
 
 private:
-	Node<T>* front_;
-	Node<T>* back_;
+	Node<T>* front_ = nullptr;
+	Node<T>* back_ = nullptr;
 	size_t size_;
 };
 
@@ -80,10 +83,7 @@ DLinkedList<T>::DLinkedList(): size_{0} {}
 
 template<typename T>
 DLinkedList<T>::DLinkedList(T data): size_{1} {
-	front_ = new Node<T>;
-	front_->data = data;
-	front_->prev = nullptr;
-	front_->next = nullptr;
+	front_ = new Node<T>{data, nullptr, nullptr};
 	back_ = front_;
 }
 
@@ -94,26 +94,19 @@ DLinkedList<T>::DLinkedList(const DLinkedList& rhs) {
 	else {
 		size_ = rhs.getSize();
 		// copy the front node
-		front_ = new Node<T>;
-		front_->data = rhs.getFront();
-		front_->prev = nullptr;
+		front_ = new Node<T>{rhs.getFront(), nullptr, nullptr};
 		if (size_ > 1) {
 			// copy the nodes between front and back
 			size_t pos = 1;
 			Node<T>* node = front_;
 			while (pos < size_ - 1) {
-				node->next = new Node<T>;
-				node->next->data = rhs.getNode(pos);
-				node->next->prev = node;
+				node->next = new Node<T>{rhs.getNode(pos), node, nullptr};
 				node = node->next;
 				++pos;
 			}
 			// copy the back node 
-			node->next = new Node<T>;
+			node->next = new Node<T>{rhs.getBack(), node, nullptr};
 			back_ = node->next;
-			back_->data = rhs.getBack();
-			back_->prev = node;
-			back_->next = nullptr;
 		}
 		else {
 			front_->next = nullptr;
@@ -169,7 +162,7 @@ T DLinkedList<T>::erase(size_t first, size_t last) {
 		size_t pos = size_ - 1;
 		for (;pos != last; --pos)
 			node = node->prev;
-		// delete nodes
+		// delete nodes 
 		Node<T>* keep_node = nullptr;
 		if (last != size_ - 1) {
 			keep_node = node->next;
@@ -301,39 +294,22 @@ T& DLinkedList<T>::setNode(size_t get_pos) {
 
 template<typename T>
 void DLinkedList<T>::addFront(const T& data) {
-	Node<T>* new_front = new Node<T>;
-	// set data
-	new_front->data = data;
-	new_front->prev = nullptr;
-	if (size_ == 0) {
-		new_front->next = nullptr;
-		front_ = new_front;
+	front_ = new Node<T>{data, nullptr, front_};
+	if (size_ == 0) 
 		back_ = front_;
-	}
 	else {
-		new_front->next = front_;
-		// make it the new front
-		front_->prev = new_front;
-		front_ = new_front;
+		front_->next->prev = front_;
 	}
 	++size_;
 }
 
 template<typename T>
 void DLinkedList<T>::addBack(const T& data) {
-	Node<T>* new_back = new Node<T>;
-	new_back->data = data;
-	new_back->next = nullptr;
-	if (size_== 0) {
-		new_back->prev = nullptr;
-		front_ = new_back;
-		back_ = new_back;
-	}
-	else {
-		new_back->prev = back_;
-		back_->next = new_back;
-		back_ = new_back;
-	}
+	back_ = new Node<T>{data, back_, nullptr};
+	if (size_== 0) 
+		front_ = back_;
+	else
+		back_->prev->next = back_;
 	++size_;
 }
 
@@ -355,10 +331,7 @@ void DLinkedList<T>::addNode(const T& data, size_t add_pos) {
 		}
 		// make a new node, such that next points to the node which is currently at the 
 		// position we want to place the new one, and prev to the previous node. 
-		Node<T>* new_node = new Node<T>;
-		new_node->data = data;
-		new_node->prev = node->prev;
-		new_node->next = node;
+		Node<T>* new_node = new Node<T>{data, node->prev, node};
 		// sandwich the newnode between node and node->previous by making their 
 		// respective prev and next point to the new node. 
 		node->prev->next = new_node;
