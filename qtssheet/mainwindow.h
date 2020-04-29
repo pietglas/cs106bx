@@ -1,21 +1,39 @@
-/* TODO:
+/* MainWindow class, containg a pointer to (and parent of) SSView
+ * TODO:
+ * - window should be larger when starting program
  * - add save/open functionality 
  */
 
 #pragma once
 
 #include <QMainWindow>
-
-QT_BEGIN_NAMESPACE
-class SSView;	//forward declaration
-QT_END_NAMESPACE
+#include <QString>
+#include <QWidget>
+#include <QToolBar>
+#include <QAction>
+#include "ssview.h"
+#include "ssmodel.h"
 
 class MainWindow : public QMainWindow {
 	Q_OBJECT
-private:
-	SSView * sheetview;
 public:
-	MainWindow(QWidget * parent=nullptr);
+	MainWindow(int rows, int cols, QWidget * parent=nullptr);
+	~MainWindow();
 public slots:
 	void showWindowTitle(const QString & title);
+	void clear();
+protected:
+	void setupMenuBar();
+	void createActions();
+private:
+	SSView * sheetview;
+	SSModel * sheetmodel;
+	QAction * clear_action;
+	QAction * exit_action;
+
+	// TODO:
+	// QAction * open_action;
+	// QAction * save_action;
+	// QAction * save_as_action;
+	
 };

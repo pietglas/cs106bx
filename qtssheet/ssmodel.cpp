@@ -2,43 +2,42 @@
 #include <QDebug>
 #include <QBrush>
 #include <QFont>
-#include <QTime>
+#include <QString>
+#include <QObject>
+#include <QModelIndex>
+#include <QVariant>
 
-SSModel::SSModel(QObject * parent) : QAbstractTableModel(parent) {}
+SSModel::SSModel(int rows, int cols, QObject * parent) : 
+				QAbstractTableModel(parent), rows_{rows}, cols_{cols} {
+	m_grid_data_.resize(rows);
+	for (int row = 0; row != m_grid_data_.size(); row++)
+		m_grid_data_[row].resize(cols);
+}
 
 SSModel::~SSModel() {}
 
 int SSModel::rowCount(const QModelIndex & /*parent*/) const {
-	return 2;
+	return rows_;
 }
 
 int SSModel::columnCount(const QModelIndex & /*parent*/) const {
-	return 2; 
+	return cols_; 
 }
 
 QVariant SSModel::data(const QModelIndex & index, int role) const {
 	if (role == Qt::DisplayRole && index.isValid())
-		return m_grid_data[index.row()][index.column()];
+		return m_grid_data_[index.row()][index.column()];
 	return QVariant();
 }
 
 QVariant SSModel::headerData(int section, Qt::Orientation orientation,
 						int role) const {
 	if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
-		switch (section) {
-		case 0:
-			return QString("A");
-		case 1:
-			return QString("B");
-		}
+		QString alph = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		return QString(alph[section]);
 	}
 	if (role == Qt::DisplayRole && orientation == Qt::Vertical) {
-		switch (section) {
-		case 0:
-			return 1;
-		case 1:
-			return 2;
-		}
+		return section + 1;
 	}
 	return QVariant();
 }
@@ -48,17 +47,17 @@ bool SSModel::setData(const QModelIndex & index, const QVariant & value, int rol
 		if (!index.isValid())
 			return false;
 		// save value from editor to model
-		m_grid_data[index.row()][index.column()] = value.toString();
-		// emit the data as title of main window
-		QString result;
-		for (int row = 0; row != rows; row++) {
-			for (int col = 0; col != cols; col++)
-				result += m_grid_data[row][col] + ' ';
-		}
-		emit editCompleted(result);
+		m_grid_data_[index.row()][index.column()] = value.toString();
 		return true;
 	}	
 	return false;
+}
+
+void SSModel::clearData() {
+	for (int row = 0; row != rows_; row++) {
+		for (int col = 0; col != cols_; col++)
+			m_grid_data_[row][col] = QString("");
+	}
 }
 
 Qt::ItemFlags SSModel::flags(const QModelIndex & index) const {

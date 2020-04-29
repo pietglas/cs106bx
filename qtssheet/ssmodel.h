@@ -1,18 +1,19 @@
 /* TODO:
+ * - include formulas
  * - parse input for dependencies
+ * - resizing window should increase nr of rows & cols
  */
 
 #pragma once
 
 #include <QAbstractTableModel>
-
-const int rows = 2;
-const int cols = 2;
+#include <QString>
+#include <QVector>
 
 class SSModel : public QAbstractTableModel {
 	Q_OBJECT
 public:
-	SSModel(QObject * parent=nullptr);
+	SSModel(int rows, int cols, QObject * parent=nullptr);
 	~SSModel();
 
 	int rowCount(const QModelIndex & parent=QModelIndex()) const override;
@@ -26,11 +27,15 @@ public:
 	bool setData(const QModelIndex & index, const QVariant & value, 
 	 			int role = Qt::EditRole) override;
 
+	void clearData();
+
 	Qt::ItemFlags flags(const QModelIndex & index) const override;
 
 private:
-	QString m_grid_data[rows][cols];
+	int rows_;
+	int cols_;
+	QVector<QVector<QString>> m_grid_data_;
 
 signals:
-	void editCompleted(const QString & );
+	
 };

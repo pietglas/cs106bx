@@ -1,18 +1,49 @@
 #include "mainwindow.h"
 #include "ssview.h"
 #include "ssmodel.h"
+#include <QMenu>
+#include <QMenuBar>
+#include <QAction>
+#include <QCoreApplication>
 
-MainWindow::MainWindow(QWidget * parent): QMainWindow(parent),
-			sheetview(new SSView(this)) {
-	setCentralWidget(sheetview);
-	SSModel * sheetmodel = new SSModel(this);
+MainWindow::MainWindow(int rows, int cols, QWidget * parent): QMainWindow(parent),
+			sheetview(new SSView(this)), sheetmodel(new SSModel(rows, cols, this)) {
+	setCentralWidget(sheetview); 
+	
+	// connect view with model
 	sheetview->setModel(sheetmodel);
+	
+	// create actions, set up menu bar
+	createActions();
+	setupMenuBar();
+}
 
-	// transfer changes to the model to the window title
-	connect(sheetmodel, &SSModel::editCompleted, this, 
-			&MainWindow::showWindowTitle);
+MainWindow::~MainWindow() {
+	delete sheetview;
+	delete sheetmodel;
+	delete clear_action;
+	delete exit_action;
 }
 
 void MainWindow::showWindowTitle(const QString & title) {
-	setWindowTitle(title);
+	setWindowTitle(tr("New File"));
+}
+
+void MainWindow::clear() {
+	sheetmodel->clearData();
+}
+
+void MainWindow::createActions() {
+	clear_action = new QAction(tr("Clear"), this);
+	clear_action->setShortcut(Qt::Key_Delete);
+	connect(clear_action, &QAction::triggered, this, &MainWindow::clear);
+
+	exit_action = new QAction(tr("Exit"), this);
+	connect(exit_action, &QAction::triggered, qApp, &QCoreApplication::quit);
+}
+
+void MainWindow::setupMenuBar() {
+	QMenu * filemenu = menuBar()->addMenu(tr("&File"));
+	filemenu->addAction(clear_action);
+	filemenu->addAction(exit_action);
 }
