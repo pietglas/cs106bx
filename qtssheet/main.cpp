@@ -1,0 +1,11 @@
+#include "ssview.h"
+#include "ssmodel.h"
+#include "mainwindow.h"
+#include <QApplication>
+
+int main(int argc, char *argv[]) {
+	QApplication a(argc, argv);
+	MainWindow window;
+	window.show();
+	return a.exec();
+}
