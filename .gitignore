@@ -1,0 +1,14 @@
+# ignore all
+*
+
+# unignore files with extensions
+!*.*
+
+# unignore dirs
+!*/
+
+moc_*
+build/
+*.o
+try.cpp
+
