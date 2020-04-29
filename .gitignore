@@ -9,6 +9,7 @@
 
 moc_*
 build/
+spreadsheet/
 *.o
 try.cpp
 
