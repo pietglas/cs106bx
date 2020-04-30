@@ -5,10 +5,17 @@
 #include <QMenuBar>
 #include <QAction>
 #include <QCoreApplication>
+#include <QInputDialog>
+#include <QDir>
+#include <QLineEdit>
+#include <QRect>
+#include <QStyle>
 
 MainWindow::MainWindow(int rows, int cols, QWidget * parent): QMainWindow(parent),
 			sheetview(new SSView(this)), sheetmodel(new SSModel(rows, cols, this)) {
 	setCentralWidget(sheetview); 
+	setGeometry(QRect(QPoint(0,0), QSize(1000, 600)));
+	// TODO: center
 	
 	// connect view with model
 	sheetview->setModel(sheetmodel);
@@ -23,6 +30,7 @@ MainWindow::~MainWindow() {
 	delete sheetmodel;
 	delete clear_action;
 	delete exit_action;
+	delete save_action;
 }
 
 void MainWindow::showWindowTitle(const QString & title) {
@@ -34,7 +42,11 @@ void MainWindow::clear() {
 }
 
 void MainWindow::saveToFile() {
-	sheetmodel->saveData();
+	bool ok;
+	QString file_name = QInputDialog::getText(this, tr("Save File"),
+						tr("Enter File Name"), QLineEdit::Normal,
+						QDir::home().dirName(), &ok);
+	sheetmodel->saveData(file_name);
 }
 
 void MainWindow::createActions() {

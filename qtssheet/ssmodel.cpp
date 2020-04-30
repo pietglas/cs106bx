@@ -62,7 +62,7 @@ void SSModel::clearData() {
 	}
 }
 
-bool SSModel::saveData() const {
+bool SSModel::saveData(const QString & file_name) const {
 	QString data;
 	for (int row = 0; row != rows_; row++) {
 		for (int col = 0; col != cols_; col++) {
@@ -71,7 +71,7 @@ bool SSModel::saveData() const {
 		}
 		data += "\n";
 	}
-	QFile csvFile("test.csv");
+	QFile csvFile(file_name);
 	if (csvFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
 		QTextStream output(&csvFile);
 		output << data;

@@ -29,7 +29,7 @@ public:
 
 	void clearData();
 
-	bool saveData() const;
+	bool saveData(const QString & file_name) const;
 
 	Qt::ItemFlags flags(const QModelIndex & index) const override;
 
