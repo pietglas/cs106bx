@@ -10,12 +10,18 @@
 #include <QLineEdit>
 #include <QRect>
 #include <QStyle>
+#include <QKeySequence>
+#include <QDesktopWidget>
 
 MainWindow::MainWindow(int rows, int cols, QWidget * parent): QMainWindow(parent),
 			sheetview(new SSView(this)), sheetmodel(new SSModel(rows, cols, this)) {
-	setCentralWidget(sheetview); 
-	setGeometry(QRect(QPoint(0,0), QSize(1000, 600)));
-	// TODO: center
+	// set sheetview to be the central widget
+	setCentralWidget(sheetview);
+
+	// set up the position and size of the window 
+	QPoint fhd_center = QRect(0, 0, 1920, 1080).center();
+	QPoint left_upper_corner = QPoint(fhd_center.x() - 500, fhd_center.y() - 300);
+	setGeometry(QRect(left_upper_corner, QSize(1000, 600)));
 	
 	// connect view with model
 	sheetview->setModel(sheetmodel);
@@ -31,6 +37,7 @@ MainWindow::~MainWindow() {
 	delete clear_action;
 	delete exit_action;
 	delete save_action;
+	delete save_to_file_action;
 }
 
 void MainWindow::showWindowTitle(const QString & title) {
@@ -43,9 +50,14 @@ void MainWindow::clear() {
 
 void MainWindow::saveToFile() {
 	bool ok;
-	QString file_name = QInputDialog::getText(this, tr("Save File"),
+	file_name = QInputDialog::getText(this, tr("Save File"),
 						tr("Enter File Name"), QLineEdit::Normal,
 						QDir::home().dirName(), &ok);
+	sheetmodel->saveData(file_name);
+	setWindowTitle(file_name);
+}
+
+void MainWindow::save() {
 	sheetmodel->saveData(file_name);
 }
 
@@ -57,13 +69,18 @@ void MainWindow::createActions() {
 	exit_action = new QAction(tr("Exit"), this);
 	connect(exit_action, &QAction::triggered, qApp, &QCoreApplication::quit);
 
-	save_action = new QAction(tr("Save File"), this);
-	connect(save_action, &QAction::triggered, this, &MainWindow::saveToFile);
+	save_to_file_action = new QAction(tr("Save As"), this);
+	connect(save_to_file_action, &QAction::triggered, this, &MainWindow::saveToFile);
+
+	save_action = new QAction(tr("Save"), this);
+	save_action->setShortcut(QKeySequence(tr("Ctrl+S")));
+	connect(save_action, &QAction::triggered, this, &MainWindow::save);
 }
 
 void MainWindow::setupMenuBar() {
 	QMenu * filemenu = menuBar()->addMenu(tr("&File"));
 	filemenu->addAction(clear_action);
 	filemenu->addAction(exit_action);
+	filemenu->addAction(save_to_file_action);
 	filemenu->addAction(save_action);
 }

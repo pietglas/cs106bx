@@ -9,9 +9,9 @@ using std::cout;	using std::endl;
 
 int main(int argc, char **argv) {
 	QApplication a(argc, argv);
-	int rows = 30;
-	int cols = 20;
-	// convert cmd input to int, to obtain row and column size
+	int rows = 100;
+	int cols = 26;
+	// when given, convert cmd input to int, to obtain row and column size
 	if (argc > 1) {
 		std::string rowss(1, argv[1][0]);
 		std::string colss(1, argv[2][0]);
