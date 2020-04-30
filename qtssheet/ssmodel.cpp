@@ -1,5 +1,6 @@
 #include "ssmodel.h"
 #include <QDebug>
+#include <QDebug>
 #include <QBrush>
 #include <QFont>
 #include <QString>
@@ -69,40 +70,41 @@ bool SSModel::getDataFromFile(const QString& file_name) {
 		QTextStream input(&csvFile);
 		input >> data;
 		csvFile.close();
+		qDebug(qUtf8Printable(data));
 
-		int index = 0;
-		QString rowstr;
-		QString colstr;
-		// get nr of rows;
-		while (data[index] != ",") {
-			rowstr += data[index];
-			++index;
-		}
-		rows_ = rowstr.toInt();
-		++(++index);	// skip ", "
+		// int index = 0;
+		// QString rowstr;
+		// QString colstr;
+		// // get nr of rows;
+		// while (data[index] != ",") {
+		// 	rowstr += data[index];
+		// 	++index;
+		// }
+		// rows_ = rowstr.toInt();
+		// ++(++index);	// skip ", "
 
-		// get nr of columns
-		while (data[index] != ",") {
-			colstr += data[index];
-			++index;
-		}
-		cols_ = colstr.toInt();
-		++(++(++index));	// skip ", " and "\n"
+		// // get nr of columns
+		// while (data[index] != ",") {
+		// 	colstr += data[index];
+		// 	++index;
+		// }
+		// cols_ = colstr.toInt();
+		// ++(++(++index));	// skip ", " and "\n"
 
-		// get data
-		QString cell;
-		for (int row = 0; row != rows; row++) {
-			for (int col = 0; col != cols; col++) {
-				while (data[index + row * cols_ + col] != ",") {
-					cell += data[index + row * cols_ + col];
-					++index;
-				}
-				m_grid_data_[row][col] = cell;
-				cell = "";
-				++(++index);	// skip ", "
-			}
-			++index;	// skip newline
-		}
+		// // get data
+		// QString cell;
+		// for (int row = 0; row != rows_; row++) {
+		// 	for (int col = 0; col != cols_; col++) {
+		// 		while (data[index + row * cols_ + col] != ",") {
+		// 			cell += data[index + row * cols_ + col];
+		// 			++index;
+		// 		}
+		// 		m_grid_data_[row][col] = cell;
+		// 		cell = "";
+		// 		++(++index);	// skip ", "
+		// 	}
+		// 	++index;	// skip newline
+		// }
 		return true;
 	}
 	return false;
@@ -111,9 +113,9 @@ bool SSModel::getDataFromFile(const QString& file_name) {
 bool SSModel::saveData(const QString & file_name) const {
 	QString data;
 	// save dimensions of the file so we can open it later
-	data += rows_;
+	data += QString::number(rows_);
 	data += ", ";
-	data += cols_;
+	data += QString::number(cols_);
 	data += ", ";
 	data += "\n";
 	// get the data

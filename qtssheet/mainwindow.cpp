@@ -79,6 +79,7 @@ void MainWindow::createActions() {
 	connect(exit_action, &QAction::triggered, qApp, &QCoreApplication::quit);
 
 	open_action = new QAction(tr("Open File"), this);
+	open_action->setShortcut(QKeySequence(tr("Ctrl+O")));
 	connect(open_action, &QAction::triggered, this, &MainWindow::LoadFromFile);
 
 	save_to_file_action = new QAction(tr("Save As"), this);
