@@ -20,11 +20,11 @@ public:
 	MainWindow(int rows, int cols, QWidget * parent=nullptr);
 	~MainWindow();
 public slots:
-	void showWindowTitle(const QString & title);
-	void clear();
+	void LoadFromFile();
 	void saveToFile();
 	void save();	
-	// void loadFromFile();
+	void showWindowTitle(const QString & title);
+	void clear();
 protected:
 	void setupMenuBar();
 	void createActions();
@@ -32,13 +32,9 @@ private:
 	QString file_name;
 	SSView * sheetview;
 	SSModel * sheetmodel;
-	QAction * clear_action;
-	QAction * exit_action;
+	QAction * open_action;
 	QAction * save_to_file_action;
 	QAction * save_action;
-	// QAction * open_action;
-	// TODO:
-	
-	// QAction * save_as_action;
-	
+	QAction * clear_action;
+	QAction * exit_action;	
 };

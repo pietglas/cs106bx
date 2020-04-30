@@ -48,6 +48,15 @@ void MainWindow::clear() {
 	sheetmodel->clearData();
 }
 
+void MainWindow::LoadFromFile() {
+	bool ok;
+	file_name = QInputDialog::getText(this, tr("Open File"),
+						tr("Enter File Name"), QLineEdit::Normal,
+						QDir::home().dirName(), &ok);
+	sheetmodel->getDataFromFile(file_name);
+	setWindowTitle(file_name);
+}
+
 void MainWindow::saveToFile() {
 	bool ok;
 	file_name = QInputDialog::getText(this, tr("Save File"),
@@ -69,6 +78,9 @@ void MainWindow::createActions() {
 	exit_action = new QAction(tr("Exit"), this);
 	connect(exit_action, &QAction::triggered, qApp, &QCoreApplication::quit);
 
+	open_action = new QAction(tr("Open File"), this);
+	connect(open_action, &QAction::triggered, this, &MainWindow::LoadFromFile);
+
 	save_to_file_action = new QAction(tr("Save As"), this);
 	connect(save_to_file_action, &QAction::triggered, this, &MainWindow::saveToFile);
 
@@ -79,8 +91,9 @@ void MainWindow::createActions() {
 
 void MainWindow::setupMenuBar() {
 	QMenu * filemenu = menuBar()->addMenu(tr("&File"));
-	filemenu->addAction(clear_action);
-	filemenu->addAction(exit_action);
+	filemenu->addAction(open_action);
 	filemenu->addAction(save_to_file_action);
 	filemenu->addAction(save_action);
+	filemenu->addAction(clear_action);
+	filemenu->addAction(exit_action);
 }

@@ -29,6 +29,8 @@ public:
 
 	void clearData();
 
+	bool getDataFromFile(const QString& file_name);
+
 	bool saveData(const QString & file_name) const;
 
 	Qt::ItemFlags flags(const QModelIndex & index) const override;

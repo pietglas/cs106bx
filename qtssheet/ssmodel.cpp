@@ -62,8 +62,61 @@ void SSModel::clearData() {
 	}
 }
 
+bool SSModel::getDataFromFile(const QString& file_name) {
+	QFile csvFile(file_name);
+	QString data;
+	if (csvFile.open(QIODevice::ReadOnly)) {
+		QTextStream input(&csvFile);
+		input >> data;
+		csvFile.close();
+
+		int index = 0;
+		QString rowstr;
+		QString colstr;
+		// get nr of rows;
+		while (data[index] != ",") {
+			rowstr += data[index];
+			++index;
+		}
+		rows_ = rowstr.toInt();
+		++(++index);	// skip ", "
+
+		// get nr of columns
+		while (data[index] != ",") {
+			colstr += data[index];
+			++index;
+		}
+		cols_ = colstr.toInt();
+		++(++(++index));	// skip ", " and "\n"
+
+		// get data
+		QString cell;
+		for (int row = 0; row != rows; row++) {
+			for (int col = 0; col != cols; col++) {
+				while (data[index + row * cols_ + col] != ",") {
+					cell += data[index + row * cols_ + col];
+					++index;
+				}
+				m_grid_data_[row][col] = cell;
+				cell = "";
+				++(++index);	// skip ", "
+			}
+			++index;	// skip newline
+		}
+		return true;
+	}
+	return false;
+}
+
 bool SSModel::saveData(const QString & file_name) const {
 	QString data;
+	// save dimensions of the file so we can open it later
+	data += rows_;
+	data += ", ";
+	data += cols_;
+	data += ", ";
+	data += "\n";
+	// get the data
 	for (int row = 0; row != rows_; row++) {
 		for (int col = 0; col != cols_; col++) {
 			data += m_grid_data_[row][col];
