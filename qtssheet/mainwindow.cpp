@@ -33,6 +33,10 @@ void MainWindow::clear() {
 	sheetmodel->clearData();
 }
 
+void MainWindow::saveToFile() {
+	sheetmodel->saveData();
+}
+
 void MainWindow::createActions() {
 	clear_action = new QAction(tr("Clear"), this);
 	clear_action->setShortcut(Qt::Key_Delete);
@@ -40,10 +44,14 @@ void MainWindow::createActions() {
 
 	exit_action = new QAction(tr("Exit"), this);
 	connect(exit_action, &QAction::triggered, qApp, &QCoreApplication::quit);
+
+	save_action = new QAction(tr("Save File"), this);
+	connect(save_action, &QAction::triggered, this, &MainWindow::saveToFile);
 }
 
 void MainWindow::setupMenuBar() {
 	QMenu * filemenu = menuBar()->addMenu(tr("&File"));
 	filemenu->addAction(clear_action);
 	filemenu->addAction(exit_action);
+	filemenu->addAction(save_action);
 }

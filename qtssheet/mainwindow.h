@@ -22,6 +22,8 @@ public:
 public slots:
 	void showWindowTitle(const QString & title);
 	void clear();
+	void saveToFile();
+	// void loadFromFile();
 protected:
 	void setupMenuBar();
 	void createActions();
@@ -30,10 +32,10 @@ private:
 	SSModel * sheetmodel;
 	QAction * clear_action;
 	QAction * exit_action;
-
-	// TODO:
+	QAction * save_action;
 	// QAction * open_action;
-	// QAction * save_action;
+	// TODO:
+	
 	// QAction * save_as_action;
 	
 };

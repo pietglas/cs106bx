@@ -6,6 +6,8 @@
 #include <QObject>
 #include <QModelIndex>
 #include <QVariant>
+#include <QFile>
+#include <QTextStream>
 
 SSModel::SSModel(int rows, int cols, QObject * parent) : 
 				QAbstractTableModel(parent), rows_{rows}, cols_{cols} {
@@ -58,6 +60,26 @@ void SSModel::clearData() {
 		for (int col = 0; col != cols_; col++)
 			m_grid_data_[row][col] = QString("");
 	}
+}
+
+bool SSModel::saveData() const {
+	QString data;
+	for (int row = 0; row != rows_; row++) {
+		for (int col = 0; col != cols_; col++) {
+			data += m_grid_data_[row][col];
+			data += ", ";
+		}
+		data += "\n";
+	}
+	QFile csvFile("test.csv");
+	if (csvFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+		QTextStream output(&csvFile);
+		output << data;
+
+		csvFile.close();
+		return true;
+	}
+	return false;
 }
 
 Qt::ItemFlags SSModel::flags(const QModelIndex & index) const {

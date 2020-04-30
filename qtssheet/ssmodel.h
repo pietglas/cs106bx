@@ -29,6 +29,8 @@ public:
 
 	void clearData();
 
+	bool saveData() const;
+
 	Qt::ItemFlags flags(const QModelIndex & index) const override;
 
 private:
