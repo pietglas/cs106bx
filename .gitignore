@@ -13,4 +13,4 @@ spreadsheet/
 *.o
 try.cpp
 *.csv
-
+*.dat
