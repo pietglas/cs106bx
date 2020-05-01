@@ -10,7 +10,7 @@
 #include <QModelIndex>
 #include <QVariant>
 #include <QFile>
-#include <QTextStream>
+#include <QDataStream>
 
 SSModel::SSModel(int rows, int cols, QObject * parent) : 
 				QAbstractTableModel(parent), rows_{rows}, cols_{cols} {
@@ -52,7 +52,7 @@ bool SSModel::setData(const QModelIndex & index, const QVariant & value, int rol
 		if (!index.isValid())
 			return false;
 		// save value from editor to model
-		m_grid_data_[index.row()][index.column()] = value.toString();
+		m_grid_data_[index.row()][index.column()] = value;
 		return true;
 	}	
 	return false;
@@ -61,62 +61,35 @@ bool SSModel::setData(const QModelIndex & index, const QVariant & value, int rol
 void SSModel::clearData() {
 	for (int row = 0; row != rows_; row++) {
 		for (int col = 0; col != cols_; col++)
-			m_grid_data_[row][col] = QString("");
+			m_grid_data_[row][col] = QVariant();
 	}
 }
 
 bool SSModel::getDataFromFile(const QString& file_name) {
-	QFile csvFile(file_name);
-	if (csvFile.open(QIODevice::ReadOnly)) {
-		QTextStream input(&csvFile);
-
-		// get row_ and col_ from first line
-		QString rowstr;
-		QString colstr;
-		input >> rowstr;
-		input >> colstr;
-		rowstr.remove(rowstr.length() - 1, 1);	// remove ","
-		colstr.remove(colstr.length() -1, 1);
-		rows_ = rowstr.toInt();
-		cols_ = colstr.toInt();
-		
-		// get data
+	QFile file(file_name);
+	if (file.open(QIODevice::ReadOnly)) {
+		QDataStream input(&file);
+		input >> rows_ >> cols_;
 		for (int row = 0; row != rows_; row++) {
-			for (int col = 0; col != cols_; col++) {
+			for (int col = 0; col != cols_; col++)
 				input >> m_grid_data_[row][col];
-				m_grid_data_[row][col].remove(
-					m_grid_data_[row][col].length() - 1, 1);
-			}
 		}
-		csvFile.close();
-
+		file.close();
 		return true;
 	}
 	return false;
 }
 
 bool SSModel::saveData(const QString & file_name) const {
-	QString data;
-	// save dimensions of the file so we can open it later
-	data += QString::number(rows_);
-	data += ", ";
-	data += QString::number(cols_);
-	data += ", ";
-	data += "\n";
-	// get the data
-	for (int row = 0; row != rows_; row++) {
-		for (int col = 0; col != cols_; col++) {
-			data += m_grid_data_[row][col];
-			data += ", ";
+	QFile file(file_name);
+	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+		QDataStream output(&file);
+		output << rows_ << cols_;
+		for (int row = 0; row != rows_; row++) {
+			for (int col = 0; col != cols_; col++)
+				output << m_grid_data_[row][col];
 		}
-		data += "\n";
-	}
-	QFile csvFile(file_name);
-	if (csvFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-		QTextStream output(&csvFile);
-		output << data;
-
-		csvFile.close();
+		file.close();
 		return true;
 	}
 	return false;
