@@ -1,6 +1,8 @@
+/* author: Piet Glas
+ */
 #include "ssview.h"
 #include "ssmodel.h"
-#include "mainwindow.h"
+#include "sswindow.h"
 #include <QApplication>
 #include <string>
 #include <iostream>
@@ -18,7 +20,7 @@ int main(int argc, char **argv) {
 		rows = std::stoi(rowss);
 		cols = std::stoi(colss);
 	}
-	MainWindow window(rows, cols);
+	SSWindow window(rows, cols);
 	window.show();
 	return a.exec();
 }

@@ -1,3 +1,5 @@
+/* author: Piet Glas
+ */
 #include "ssmodel.h"
 #include <QDebug>
 #include <QDebug>
@@ -65,46 +67,29 @@ void SSModel::clearData() {
 
 bool SSModel::getDataFromFile(const QString& file_name) {
 	QFile csvFile(file_name);
-	QString data;
 	if (csvFile.open(QIODevice::ReadOnly)) {
 		QTextStream input(&csvFile);
-		input >> data;
+
+		// get row_ and col_ from first line
+		QString rowstr;
+		QString colstr;
+		input >> rowstr;
+		input >> colstr;
+		rowstr.remove(rowstr.length() - 1, 1);	// remove ","
+		colstr.remove(colstr.length() -1, 1);
+		rows_ = rowstr.toInt();
+		cols_ = colstr.toInt();
+		
+		// get data
+		for (int row = 0; row != rows_; row++) {
+			for (int col = 0; col != cols_; col++) {
+				input >> m_grid_data_[row][col];
+				m_grid_data_[row][col].remove(
+					m_grid_data_[row][col].length() - 1, 1);
+			}
+		}
 		csvFile.close();
-		qDebug(qUtf8Printable(data));
 
-		// int index = 0;
-		// QString rowstr;
-		// QString colstr;
-		// // get nr of rows;
-		// while (data[index] != ",") {
-		// 	rowstr += data[index];
-		// 	++index;
-		// }
-		// rows_ = rowstr.toInt();
-		// ++(++index);	// skip ", "
-
-		// // get nr of columns
-		// while (data[index] != ",") {
-		// 	colstr += data[index];
-		// 	++index;
-		// }
-		// cols_ = colstr.toInt();
-		// ++(++(++index));	// skip ", " and "\n"
-
-		// // get data
-		// QString cell;
-		// for (int row = 0; row != rows_; row++) {
-		// 	for (int col = 0; col != cols_; col++) {
-		// 		while (data[index + row * cols_ + col] != ",") {
-		// 			cell += data[index + row * cols_ + col];
-		// 			++index;
-		// 		}
-		// 		m_grid_data_[row][col] = cell;
-		// 		cell = "";
-		// 		++(++index);	// skip ", "
-		// 	}
-		// 	++index;	// skip newline
-		// }
 		return true;
 	}
 	return false;

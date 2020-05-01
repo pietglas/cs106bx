@@ -1,3 +1,5 @@
+/* author: Piet Glas
+ */
 #include "ssview.h"
 #include <QTableView>
 
