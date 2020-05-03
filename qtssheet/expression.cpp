@@ -1,28 +1,46 @@
 #include <memory>
 #include <set>
+#include <QDebug>
 #include "expressiontree.h"
 
-int precedence(const QString & operator);
+int precedence(const QString & oper);
 // Returns the position of the operator with the least
 // precedence. If there are several, it returns the 
 // leftmost one. 
 // Assumes the the expression corresponding to `tokens`
 // is not enclosed in braces, otherwise it doesn't behave
 // well. 
-int least_precedence_operator(const QVector & tokens);
+int least_precedence_operator(const QVector<QString> & tokens);
 
-Expression::Expression(QVector<QString> tokens) {
+Expression::Expression(QVector<QString> & tokens) {
 	if (tokens.size() == 1) {
-		data_ = tokens[0];
+		token_ = tokens[0];
+		qDebug() << "set token: " << token_;
 		rhs_ = nullptr;
 		lhs_ = nullptr;
 	}
 	else {
+		// check for enclosing braces first
+		if ((tokens[0] == "(") && (tokens.last() == ")"))
+			tokens = tokens.mid(1, tokens.length() - 2);
 		int pos = least_precedence_operator(tokens);
-		QVector<QString> lhs = tokens::mid(0, pos);
-		QVector<QString> rhs = tokens::mid(pos + 1, -1);
+		token_ = tokens[pos];
+		qDebug() << "position least precedence: " << pos;
+		qDebug() << "set token: " << token_;
+		QVector<QString> lhs = tokens.mid(0, pos);
+		qDebug() << "lhs: " << lhs;
+		QVector<QString> rhs = tokens.mid(pos + 1, -1);
+		qDebug() << "rhs: " << rhs;
 		lhs_ = std::make_unique<Expression>(lhs);
 		rhs_ = std::make_unique<Expression>(rhs);
+	}
+}
+
+void Expression::print() const {
+	qDebug() << token_;
+	if (lhs_ != nullptr) {	// either both are null, or neither
+		lhs_->print();
+		rhs_->print();
 	}
 }
 
@@ -37,16 +55,16 @@ int precedence(const QString & oper) {
 
 int least_precedence_operator(const QVector<QString> & tokens) {
 	int pos = -1;
-	int current_precedence = 4;
+	int current_precedence = 1e6;
 	int depth = 0;
 	std::set<QString> operators{"+", "-", "/", "*", "^"};
 	for (int i = 0; i != tokens.length(); i++) {
-		if (tokens[pos] == "(")
+		if (tokens[i] == "(")
 			depth += 10;	// operators within braces have less precedence
-		else if (tokens[pos] == ")")
+		else if (tokens[i] == ")")
 			depth -= 10;
-		else if (operators.find(tokens[pos]) != operators.end()) {
-			if (precedence(tokens[pos] + depth) < current_precedence) {
+		else if (operators.find(tokens[i]) != operators.end()) {
+			if (precedence(tokens[i]) + depth < current_precedence) {
 				pos = i;
 				current_precedence = precedence(tokens[pos]);
 				if (current_precedence == 1)

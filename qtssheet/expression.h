@@ -1,3 +1,5 @@
+#pragma once
+
 #include "tokenizer.h"
 #include <memory>
 
@@ -6,7 +8,8 @@
 // correct. 
 class Expression {
 public:
-	Expression(QVector tokens);
+	Expression(QVector<QString> & tokens);
+	void print() const;
 private:
 	QString token_;
 	std::unique_ptr<Expression> lhs_;
