@@ -19,5 +19,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 # Input
-HEADERS += sswindow.h ssmodel.h ssview.h
-SOURCES += main.cpp sswindow.cpp ssmodel.cpp ssview.cpp
+HEADERS += sswindow.h ssmodel.h ssview.h expression.h tokenizer.h
+SOURCES += main.cpp sswindow.cpp ssmodel.cpp ssview.cpp 
+		expression.cpp tokenizer.cpp

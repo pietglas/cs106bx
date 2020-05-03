@@ -9,8 +9,8 @@
 Tokenizer::Tokenizer(){}
 
 bool Tokenizer::tokenize(const QString & formula) {
-	// reset tokenized_form_
-	tokenized_form_.clear();
+	// reset tokenized_
+	tokenized_.clear();
 
 	int pos = 0;
 	while (pos != formula.length()) {
@@ -18,35 +18,35 @@ bool Tokenizer::tokenize(const QString & formula) {
 		// skip whitespaces
 		if (formula[pos] == " ")
 			++pos;
-		else if (capital_type_.find(formula[pos]) != capital_type_.end()) {
+		else if (capitals_.find(formula[pos]) != capitals_.end()) {
 			token += formula[pos];
 			++pos;
-			while (number_type_.find(formula[pos]) != number_type_.end()) {
+			while (numbers_.find(formula[pos]) != numbers_.end()) {
 				if (formula[pos] == '.')
 					return false;
 				token += formula[pos];
 				++pos;
 			}	
-			tokenized_form_.push_back(token);
+			tokenized_.push_back(token);
 			token = "";
 		}
-		else if (number_type_.find(formula[pos]) != number_type_.end()) {
-			while (number_type_.find(formula[pos]) != number_type_.end()) {
+		else if (numbers_.find(formula[pos]) != numbers_.end()) {
+			while (numbers_.find(formula[pos]) != numbers_.end()) {
 				token += formula[pos];
 				++pos;
 			}	
-			tokenized_form_.push_back(token);
+			tokenized_.push_back(token);
 			token = "";
 		}
-		else if (punctuation_type_.find(formula[pos]) != punctuation_type_.end()) {
+		else if (punctuations_.find(formula[pos]) != punctuations_.end()) {
 			token = QString(formula[pos]);
-			tokenized_form_.push_back(token);
+			tokenized_.push_back(token);
 			token = "";
 			++pos;
 		}
-		else if (operation_type_.find(formula[pos]) != operation_type_.end()) {
+		else if (operations_.find(formula[pos]) != operations_.end()) {
 			token = QString(formula[pos]);
-			tokenized_form_.push_back(token);
+			tokenized_.push_back(token);
 			token = "";
 			++pos;
 		}
@@ -56,8 +56,42 @@ bool Tokenizer::tokenize(const QString & formula) {
 	return true;
 }
 
+bool Tokenizer::validate() const { 
+	int leftbrace_count = 0;
+	int rightbrace_count = 0;
+	for (int pos = 0; pos != tokenized_.length(); pos++) {
+		if (pos == 0) {
+			if (soperations_.find(tokenized_[pos]) != soperations_.end())
+				return false;	// operator at start of expression
+		}
+		if (soperations_.find(tokenized_[pos]) != soperations_.end()) {
+			if (pos == tokenized_.length() - 1)
+				return false;	// operator at end of expression
+			if (soperations_.find(tokenized_[pos + 1]) != soperations_.end() ||
+				tokenized_[pos + 1] == ")")
+				return false;	// operation next to operation or )
+		}
+		else if (spunctuations_.find(tokenized_[pos]) != spunctuations_.end()) {
+			if (tokenized_[pos] == "(")
+				leftbrace_count++;
+			else
+				rightbrace_count++;
+			if (rightbrace_count > leftbrace_count)
+				return false;	// more right than left braces
+		}
+		else {
+			if (pos != tokenized_.length() - 1) {
+				if (soperations_.find(tokenized_[pos + 1]) == soperations_.end() &&
+					spunctuations_.find(tokenized_[pos + 1]) == spunctuations_.end())
+					return false; // two numbers next to each others
+			}
+		}
+	}
+	return true;
+}
+
 QVector<QString> Tokenizer::tokenized() const {
-	return tokenized_form_;
+	return tokenized_;
 }
 
 int precedence(const QString & oper);
@@ -139,36 +173,50 @@ int least_precedence_operator(const QVector<QString> & tokens) {
 int main() {
 	QString formula1 = "A1 + B1 * C22";
 	Tokenizer get_tokens;
-	if (get_tokens.tokenize(formula1)) { 
-		QVector<QString> tokens = get_tokens.tokenized();
-		qDebug() << tokens;
-		Expression expression1(tokens);
-		expression1.print();
+	if (get_tokens.tokenize(formula1)) {
+		if (get_tokens.validate()) { 
+			QVector<QString> tokens = get_tokens.tokenized();
+			qDebug() << tokens;
+			Expression expression1(tokens);
+			expression1.print();
+		}
 	}
 
 	QString formula2 = "A1*(B1^C2 + 20.5)/ 3";
 	if (get_tokens.tokenize(formula2)) { 
-		QVector<QString> tokens_2 = get_tokens.tokenized();
-		qDebug() << tokens_2;
-		Expression expression2(tokens_2);
-		expression2.print();
+		if (get_tokens.validate()) {
+			QVector<QString> tokens_2 = get_tokens.tokenized();
+			qDebug() << tokens_2;
+			Expression expression2(tokens_2);
+			expression2.print();
+		}
+		else
+			qDebug() << "formula syntactically incorrect";
 	}
 
-	// QString formula3 = "A1 & 2";
-	// if (get_tokens.tokenize(formula3)) {
-	// 	QVector<QString> tokens_3 = get_tokens.tokenized();
-	// 	qDebug() << tokens_3;
-	// }
-	// else
-	// 	qDebug() << "a non-token was entered";
+	QString formula3 = "A1 ^ (2) + (24 +)";
+	if (get_tokens.tokenize(formula3)) {
+		if (get_tokens.validate()) {
+			QVector<QString> tokens_3 = get_tokens.tokenized();
+			qDebug() << tokens_3;
+		}
+		else
+			qDebug() << "formula syntactically incorrect";
+	}
+	else
+		qDebug() << "a non-token was entered";
 
-	// QString formula4 = "A3.";
-	// if (get_tokens.tokenize(formula4)) { 
-	// 	QVector<QString> tokens = get_tokens.tokenized();
-	// 	qDebug() << tokens;
-	// }
-	// else
-	// 	qDebug() << "a non-token was entered";
+	QString formula4 = "A3 + B2*";
+	if (get_tokens.tokenize(formula4)) { 
+		if (get_tokens.validate()) {
+			QVector<QString> tokens = get_tokens.tokenized();
+			qDebug() << tokens;
+		}
+		else
+			qDebug() << "formula syntactically incorrect";
+	}
+	else
+		qDebug() << "a non-token was entered";
 
 
 
