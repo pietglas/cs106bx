@@ -9,9 +9,12 @@
 class Expression {
 public:
 	Expression(QVector<QString> & tokens);
+	std::shared_ptr<Expression> lhs();
+	std::shared_ptr<Expression> rhs();
+	QString token() const;
 	void print() const;
 private:
 	QString token_;
-	std::unique_ptr<Expression> lhs_;
-	std::unique_ptr<Expression> rhs_;
+	std::shared_ptr<Expression> lhs_;
+	std::shared_ptr<Expression> rhs_;
 };

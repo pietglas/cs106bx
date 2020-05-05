@@ -31,8 +31,8 @@ Expression::Expression(QVector<QString> & tokens) {
 		qDebug() << "lhs: " << lhs;
 		QVector<QString> rhs = tokens.mid(pos + 1, -1);
 		qDebug() << "rhs: " << rhs;
-		lhs_ = std::make_unique<Expression>(lhs);
-		rhs_ = std::make_unique<Expression>(rhs);
+		lhs_ = std::make_shared<Expression>(lhs);
+		rhs_ = std::make_shared<Expression>(rhs);
 	}
 }
 
@@ -44,8 +44,22 @@ void Expression::print() const {
 	}
 }
 
+std::shared_ptr<Expression> Expression::lhs() {
+	return lhs_;
+}
+
+std::shared_ptr<Expression> Expression::rhs() {
+	return rhs_;
+}
+
+QString Expression::token() const {
+	return token_;
+}
+
 int precedence(const QString & oper) {
-	if (oper == "+" || oper == "-")
+	if (oper == "=")
+		return 0;
+	else if (oper == "+" || oper == "-")
 		return 1;
 	else if (oper == "*" || oper == "/")
 		return 2;
@@ -57,7 +71,7 @@ int least_precedence_operator(const QVector<QString> & tokens) {
 	int pos = -1;
 	int current_precedence = 1e6;
 	int depth = 0;
-	std::set<QString> operators{"+", "-", "/", "*", "^"};
+	std::set<QString> operators{"=", "+", "-", "/", "*", "^"};
 	for (int i = 0; i != tokens.length(); i++) {
 		if (tokens[i] == "(")
 			depth += 10;	// operators within braces have less precedence
@@ -67,7 +81,7 @@ int least_precedence_operator(const QVector<QString> & tokens) {
 			if (precedence(tokens[i]) + depth < current_precedence) {
 				pos = i;
 				current_precedence = precedence(tokens[pos]);
-				if (current_precedence == 1)
+				if (current_precedence == 0)
 					break; 
 			}
 		}

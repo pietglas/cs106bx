@@ -35,10 +35,10 @@ private:
 		"(", ")"
 	};
 	std::set<QChar> operations_ {
-		'*', '/', '-', '+', '^'
+		'=', '-', '+', '*', '/', '^'
 	};
 	std::set<QString> soperations_ {
-		"*", "/", "-", "+", "^"
+		"=", "-", "+", "*", "/", "^"
 	};
 	QVector<QString> tokenized_;
 };

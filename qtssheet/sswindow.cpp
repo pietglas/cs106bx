@@ -37,11 +37,11 @@ SSWindow::SSWindow(int rows, int cols, QWidget * parent): QMainWindow(parent),
 SSWindow::~SSWindow() {
 	delete sheetview_;
 	delete sheetmodel_;
-	delete open_action_;
-	delete save_to_file_action_;
-	delete save_action_;
-	delete clear_action_;
-	delete exit_action_;
+	delete open_;
+	delete save_to_file_;
+	delete save_;
+	delete clear_;
+	delete exit_;
 }
 
 void SSWindow::showWindowTitle(const QString & title) {
@@ -74,31 +74,46 @@ void SSWindow::save() {
 	sheetmodel_->saveData(file_name_);
 }
 
+void SSWindow::addFormula() {
+	bool ok;
+	QString formula = QInputDialog::getText(this, tr("Enter Formula"),
+						tr("Enter Formula"), QLineEdit::Normal,
+						QDir::home().dirName(), &ok);
+	sheetmodel_->setFormula(formula);
+}
+
 void SSWindow::createActions() {
-	clear_action_ = new QAction(tr("Clear"), this);
-	clear_action_->setShortcut(Qt::Key_Delete);
-	connect(clear_action_, &QAction::triggered, this, &SSWindow::clear);
+	clear_ = new QAction(tr("Clear"), this);
+	clear_->setShortcut(Qt::Key_Delete);
+	connect(clear_, &QAction::triggered, this, &SSWindow::clear);
 
-	exit_action_ = new QAction(tr("Exit"), this);
-	connect(exit_action_, &QAction::triggered, qApp, &QCoreApplication::quit);
+	exit_ = new QAction(tr("Exit"), this);
+	connect(exit_, &QAction::triggered, qApp, &QCoreApplication::quit);
 
-	open_action_ = new QAction(tr("Open File"), this);
-	open_action_->setShortcut(QKeySequence(tr("Ctrl+O")));
-	connect(open_action_, &QAction::triggered, this, &SSWindow::loadFromFile);
+	open_ = new QAction(tr("Open File"), this);
+	open_->setShortcut(QKeySequence(tr("Ctrl+O")));
+	connect(open_, &QAction::triggered, this, &SSWindow::loadFromFile);
 
-	save_to_file_action_ = new QAction(tr("Save As"), this);
-	connect(save_to_file_action_, &QAction::triggered, this, &SSWindow::saveToFile);
+	save_to_file_ = new QAction(tr("Save As"), this);
+	connect(save_to_file_, &QAction::triggered, this, &SSWindow::saveToFile);
 
-	save_action_ = new QAction(tr("Save"), this);
-	save_action_->setShortcut(QKeySequence(tr("Ctrl+S")));
-	connect(save_action_, &QAction::triggered, this, &SSWindow::save);
+	save_ = new QAction(tr("Save"), this);
+	save_->setShortcut(QKeySequence(tr("Ctrl+S")));
+	connect(save_, &QAction::triggered, this, &SSWindow::save);
+
+	add_formula_ = new QAction(tr("Add Formula"), this);
+	connect(add_formula_, &QAction::triggered, this, &SSWindow::addFormula);
 }
 
 void SSWindow::setupMenuBar() {
-	QMenu * filemenu = menuBar()->addMenu(tr("&File"));
-	filemenu->addAction(open_action_);
-	filemenu->addAction(save_to_file_action_);
-	filemenu->addAction(save_action_);
-	filemenu->addAction(clear_action_);
-	filemenu->addAction(exit_action_);
+	// file menu
+	QMenu * filemenu = menuBar()->addMenu(tr("File"));
+	filemenu->addAction(open_);
+	filemenu->addAction(save_to_file_);
+	filemenu->addAction(save_);
+	filemenu->addAction(clear_);
+	filemenu->addAction(exit_);
+	// add formula
+	QMenu * formula_menu = menuBar()->addMenu(tr("Cell"));
+	formula_menu->addAction(add_formula_);
 }

@@ -30,8 +30,9 @@ public slots:
 	void loadFromFile();
 	void saveToFile();
 	void save();	
-	void showWindowTitle(const QString & title);
 	void clear();
+	void showWindowTitle(const QString & title);
+	void addFormula();
 protected:
 	void setupMenuBar();
 	void createActions();
@@ -39,9 +40,10 @@ private:
 	QString file_name_;
 	SSView * sheetview_;
 	SSModel * sheetmodel_;
-	QAction * open_action_;
-	QAction * save_to_file_action_;
-	QAction * save_action_;
-	QAction * clear_action_;
-	QAction * exit_action_;	
+	QAction * open_;
+	QAction * save_to_file_;
+	QAction * save_;
+	QAction * clear_;
+	QAction * exit_;	
+	QAction * add_formula_;
 };

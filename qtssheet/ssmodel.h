@@ -7,11 +7,15 @@
 
 #pragma once
 
+#include "expression.h"
+
 #include <QAbstractTableModel>
 #include <QVariant>
 #include <QString>
 #include <QVector>
+#include <QPair>
 #include <QObject>
+#include <QMap>
 
 // Model containing the data for our spreadsheet, and an interface which
 // SSView and MainWindow use for communicating changes made by the user.
@@ -39,6 +43,8 @@ public:
 	bool getDataFromFile(const QString& file_name);
 	// Save data in a .dat file. 
 	bool saveData(const QString & file_name) const;
+	// Add a formula.
+	bool setFormula(const QString & formula);
 
 	Qt::ItemFlags flags(const QModelIndex & index) const override;
 
@@ -46,6 +52,16 @@ private:
 	int rows_;
 	int cols_;
 	QVector<QVector<QVariant>> m_grid_data_;
+	QMap<QString, QVector<QString>> formulas_;
+	QString alph_ = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";	// for column index
+	std::set<QString> operations_ {
+		"-", "+", "*", "/", "^"
+	};
+
+	// converts displayed index (i.e. `A2`) to model index (i.e. `<1, 0>`)
+	QPair convertStrToIndex(const QString & index);
+	// calculate a formula.
+	double calculateFormula(std::shared_ptr<Expression> formula) const;
 
 signals:
 	
