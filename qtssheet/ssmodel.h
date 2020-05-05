@@ -1,13 +1,12 @@
 /* Author: Piet Glas
  *
  * TODO:
- * - include formulas
  * - parse input for dependencies
  */
 
 #pragma once
 
-#include "expression.h"
+#include "formula/expression.h"
 
 #include <QAbstractTableModel>
 #include <QVariant>
@@ -51,17 +50,15 @@ public:
 private:
 	int rows_;
 	int cols_;
-	QVector<QVector<QVariant>> m_grid_data_;
-	QMap<QString, QVector<QString>> formulas_;
+	QMap<QString, QPair<QVariant, QVector<QString>>> data_;
 	QString alph_ = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";	// for column index
-	std::set<QString> operations_ {
-		"-", "+", "*", "/", "^"
-	};
 
 	// converts displayed index (i.e. `A2`) to model index (i.e. `<1, 0>`)
-	QPair convertStrToIndex(const QString & index);
+	QPair<int, int> convertStrToIndex(const QString & index) const;
+	// reverse of the previous
+	QStirng convertIndexToStr(const QPair<int, int> & index) const;
 	// calculate a formula.
-	double calculateFormula(std::shared_ptr<Expression> formula) const;
+	double calculateFormula(std::shared_ptr<Expression> formula);
 
 signals:
 	

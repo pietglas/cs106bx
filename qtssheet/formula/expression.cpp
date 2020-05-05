@@ -1,7 +1,7 @@
 #include <memory>
 #include <set>
 #include <QDebug>
-#include "expressiontree.h"
+#include "expression.h"
 
 int precedence(const QString & oper);
 // Returns the position of the operator with the least
@@ -15,7 +15,6 @@ int least_precedence_operator(const QVector<QString> & tokens);
 Expression::Expression(QVector<QString> & tokens) {
 	if (tokens.size() == 1) {
 		token_ = tokens[0];
-		qDebug() << "set token: " << token_;
 		rhs_ = nullptr;
 		lhs_ = nullptr;
 	}
@@ -25,12 +24,8 @@ Expression::Expression(QVector<QString> & tokens) {
 			tokens = tokens.mid(1, tokens.length() - 2);
 		int pos = least_precedence_operator(tokens);
 		token_ = tokens[pos];
-		qDebug() << "position least precedence: " << pos;
-		qDebug() << "set token: " << token_;
 		QVector<QString> lhs = tokens.mid(0, pos);
-		qDebug() << "lhs: " << lhs;
 		QVector<QString> rhs = tokens.mid(pos + 1, -1);
-		qDebug() << "rhs: " << rhs;
 		lhs_ = std::make_shared<Expression>(lhs);
 		rhs_ = std::make_shared<Expression>(rhs);
 	}

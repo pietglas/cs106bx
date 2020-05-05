@@ -1,8 +1,8 @@
 /* author: Piet Glas
  */
 #include "ssmodel.h"
-#include "tokenizer.h"
-#include "expression.h"
+#include "formula/tokenizer.h"
+#include "formula/expression.h"
 #include <math.h>
 #include <QDebug>
 #include <QDebug>
@@ -33,8 +33,11 @@ int SSModel::columnCount(const QModelIndex & /*parent*/) const {
 }
 
 QVariant SSModel::data(const QModelIndex & index, int role) const {
-	if (role == Qt::DisplayRole && index.isValid())
-		return m_grid_data_[index.row()][index.column()];
+	QPair<int, int> normindex = qMakePair(index.x, index.y);
+	QString strindex = convertIndexToString(normindex);
+	bool index_found = data_.contains(strindex);
+	if (role == Qt::DisplayRole && index.isValid() && index_found)
+		return data_[strindex].first;
 	return QVariant();
 }
 
@@ -49,22 +52,22 @@ QVariant SSModel::headerData(int section, Qt::Orientation orientation,
 	return QVariant();
 }
 
-bool SSModel::setData(const QModelIndex & index, const QVariant & value, int role) {
-	if (role == Qt::EditRole) {
-		if (!index.isValid())
-			return false;
+bool SSModel::setData(const QModelIndex & index, 
+						const QVariant & value, int role) {
+	if (role == Qt::EditRole && index.isValid()) {
 		// save value from editor to model
-		m_grid_data_[index.row()][index.column()] = value;
+		QPair<int, int> normindex = qMakePair(index.x, index.y);
+		QString strindex = convertIndexToString(normindex);
+		QVector<QString> empty_vec;
+		QPair<QVariant, QVector<QString>> val = qMakePair(value, empty_vec);
+		data_.insert(strindex, val);
 		return true;
 	}	
 	return false;
 }
 
 void SSModel::clearData() {
-	for (int row = 0; row != rows_; row++) {
-		for (int col = 0; col != cols_; col++)
-			m_grid_data_[row][col] = QVariant();
-	}
+	data_.clear();
 }
 
 bool SSModel::getDataFromFile(const QString& file_name) {
@@ -99,59 +102,71 @@ bool SSModel::saveData(const QString & file_name) const {
 
 bool SSModel::setFormula(const QString & formula) {
 	Tokenizer tokenizer;
-	if (tokenizer.tokenize(formula)) {
-		if (tokenizer.validate()) {
+	if (tokenizer.tokenize(formula)) {	// turn string into vector of tokens
+		if (tokenizer.validate()) {	// check for correct syntax
 			// update existing formula or add a new one
 			QString key = tokenizer.tokenized()[0];
-			QVector value = tokenizer.tokenized().mid(2, -1);
-			formulas_.insert(key, value);
+			QVector<QString> second = tokenizer.tokenized().mid(2, -1);
 
-			// update the actual data displayed
-			auto formula_ptr = std::make_shared<Expression>(value);
-			double val = SSModel::calculateFormula(expression);
-			QPair index = SSModel::convertStrToIndex(key);
-			m_grid_data_[index.first][index.second] = val;
+			// set data displayed
+			auto formula_ptr = std::make_shared<Expression>(second);
+			double first = SSModel::calculateFormula(formula_ptr);
+			QPair<QVariant, QVector<QString>> value = qMakePair(first, second);
+
+			data_.insert(key, value);
+		
+			return true;
 		}
+		return false;
 	}
 	return false;
 }
 
-double calculateFormula(std::shared_ptr<Expression> formula) {
-	if (formula->left() == nullptr) {
+double SSModel::calculateFormula(std::shared_ptr<Expression> formula) {
+	if (formula->lhs() == nullptr) {
 		bool ok;
-		double try_conv = formula.token().toDouble(&ok);
-		if (*ok)
+		double try_conv = formula->token().toDouble(&ok);
+		if (ok)
 			return try_conv;
 		else {
-			QPair index = SSModel::convertStrToIndex(formula.token());
-			return m_grid_data_[index.first][index.second];
+			QPair<int, int> index = SSModel::convertStrToIndex(formula->token());
+			return data_[formula->token()].first.toDouble();
 		}
 	}
 	else {
-		if (formula.token() == "+")
-			return calculateFormula(formula.left()) + 
-					calculateFormula(formula.right());
-		else if (formula.token() == "-")
-			return calculateFormula(formula.left()) - 
-					calculateFormula(formula.right());
-		else if (formula.token() == "*")
-			return calculateFormula(formula.left()) * 
-					calculateFormula(formula.right());
-		else if (formula.token() == "/")
-			return calculateFormula(formula.left()) / 
-					calculateFormula(formula.right());
+		if (formula->token() == "+")
+			return calculateFormula(formula->lhs()) + 
+					calculateFormula(formula->rhs());
+		else if (formula->token() == "-")
+			return calculateFormula(formula->lhs()) - 
+					calculateFormula(formula->rhs());
+		else if (formula->token() == "*")
+			return calculateFormula(formula->lhs()) * 
+					calculateFormula(formula->rhs());
+		else if (formula->token() == "/")
+			return calculateFormula(formula->lhs()) / 
+					calculateFormula(formula->rhs());
 		else
-			return pow(calculateFormula(formula.left()),
-						calculateFormula(formula.right()));
+			return pow(calculateFormula(formula->lhs()),
+						calculateFormula(formula->rhs()));
 	}
 }
 
-QPair SSModel::convertStrToIndex(const QString & index) {
+QPair<int, int> SSModel::convertStrToIndex(const QString & index) const {
 	int col = 0;
 	while (alph_[col] != index[0]) 
 		++col;
-	int row = index.mid(1, -1).toInt();
+	int row = index.mid(1, -1).toInt() - 1;
 	return qMakePair(row, col);
+}
+
+QString convertIndexToStr(const QPair<int, int> & index) const {
+	int row = index.first + 1;
+	int col = index.second;
+	QString dindex;
+	dindex += alph_[col];
+	dindex += QString::number(row);
+	return dindex;
 }
 
 

@@ -42,6 +42,7 @@ SSWindow::~SSWindow() {
 	delete save_;
 	delete clear_;
 	delete exit_;
+	delete add_formula_;
 }
 
 void SSWindow::showWindowTitle(const QString & title) {

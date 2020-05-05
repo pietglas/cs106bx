@@ -1,7 +1,7 @@
 /* Author: Piet Glas
  *
  * TODO:
- * -
+ * - display formulae somewhere
  */
 
 #pragma once
