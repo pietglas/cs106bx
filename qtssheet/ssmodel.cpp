@@ -16,11 +16,7 @@
 #include <QDataStream>
 
 SSModel::SSModel(int rows, int cols, QObject * parent) : 
-				QAbstractTableModel(parent), rows_{rows}, cols_{cols} {
-	m_grid_data_.resize(rows);
-	for (int row = 0; row != m_grid_data_.size(); row++)
-		m_grid_data_[row].resize(cols);
-}
+				QAbstractTableModel(parent), rows_{rows}, cols_{cols} {}
 
 SSModel::~SSModel() {}
 
@@ -58,8 +54,8 @@ bool SSModel::setData(const QModelIndex & index,
 		// save value from editor to model
 		QPair<int, int> normindex = qMakePair(index.x, index.y);
 		QString strindex = convertIndexToString(normindex);
-		QVector<QString> empty_vec;
-		QPair<QVariant, QVector<QString>> val = qMakePair(value, empty_vec);
+		QString empty_formula;
+		QPair<QVariant, QString> val = qMakePair(value, empty_formula);
 		data_.insert(strindex, val);
 		return true;
 	}	
@@ -88,11 +84,15 @@ bool SSModel::getDataFromFile(const QString& file_name) {
 bool SSModel::saveData(const QString & file_name) const {
 	QFile file(file_name);
 	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-		QDataStream output(&file);
-		output << rows_ << cols_;
-		for (int row = 0; row != rows_; row++) {
-			for (int col = 0; col != cols_; col++)
-				output << m_grid_data_[row][col];
+		QTextStream output(&file);
+		output << QString::number(rows_) << QString::number(cols_);
+		for (auto pair : data_) {
+			if (pair.second.second == "") {
+				output << pair.first << ":" << pair.second.first.toStr();
+			}
+			else {
+				output << pair.first << "=" << pair.second.second;
+			}
 		}
 		file.close();
 		return true;
@@ -106,12 +106,12 @@ bool SSModel::setFormula(const QString & formula) {
 		if (tokenizer.validate()) {	// check for correct syntax
 			// update existing formula or add a new one
 			QString key = tokenizer.tokenized()[0];
-			QVector<QString> second = tokenizer.tokenized().mid(2, -1);
+			QVector<QString> tokens = tokenizer.tokenized().mid(2, -1);
 
 			// set data displayed
-			auto formula_ptr = std::make_shared<Expression>(second);
-			double first = SSModel::calculateFormula(formula_ptr);
-			QPair<QVariant, QVector<QString>> value = qMakePair(first, second);
+			auto formula_ptr = std::make_shared<Expression>(tokens);
+			double val = SSModel::calculateFormula(formula_ptr);
+			QPair<QVariant, QString> value = qMakePair(val, formula);
 
 			data_.insert(key, value);
 		

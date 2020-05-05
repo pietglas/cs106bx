@@ -50,7 +50,7 @@ public:
 private:
 	int rows_;
 	int cols_;
-	QMap<QString, QPair<QVariant, QVector<QString>>> data_;
+	QMap<QString, QPair<QVariant,QString>> data_;
 	QString alph_ = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";	// for column index
 
 	// converts displayed index (i.e. `A2`) to model index (i.e. `<1, 0>`)
