@@ -69,11 +69,48 @@ void SSModel::clearData() {
 bool SSModel::getDataFromFile(const QString& file_name) {
 	QFile file(file_name);
 	if (file.open(QIODevice::ReadOnly)) {
-		QDataStream input(&file);
-		input >> rows_ >> cols_;
-		for (int row = 0; row != rows_; row++) {
-			for (int col = 0; col != cols_; col++)
-				input >> m_grid_data_[row][col];
+		QTextStream input(&file);
+		QString rowsstr;
+		QString colstr;
+		// set rows_ and cols_
+		input >> rowsstr >> colstr;
+		rows_ = rowsstr.toInt();
+		cols_ = colstr.toInt();
+		// set data
+		QString data;
+		ctr = 0;	// counts which item of the line we're at
+		QString index; 
+		bool has_formula;
+		while (input >> data) {
+			if (ctr == 0) {	// first item: index
+				index = data;
+				++ctr;
+			}
+			else if (ctr == 1) {	// second item: "=" or ":"
+				if (data == ":")
+					has_formula = false
+				else
+					has_formula = true;
+				++ctr;
+			}
+			else {	// handle presence/absence formula
+				if (has_formula) {
+					QString formula = index + "=" + data;
+					SSModel::setFormula(formula);
+				}
+				else {
+					QPair<QVariant,QString> single_value;
+					QString empty_formula;
+					bool ok;
+					double val = data.toDouble(ok);
+					if (ok)
+						single_value = qMakePair(val, empty_formula);
+					else
+						single_value = qMakePair(data, empty_formula);
+					data_.insert(index, single_value)
+				}
+				ctr = 0;
+			}
 		}
 		file.close();
 		return true;
