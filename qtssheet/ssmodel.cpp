@@ -70,27 +70,25 @@ bool SSModel::getDataFromFile(const QString& file_name) {
 	QFile file(file_name);
 	if (file.open(QIODevice::ReadOnly)) {
 		QTextStream input(&file);
+		// set rows_ and cols
 		QString rowsstr;
-		QString colstr;
-		// set rows_ and cols_
+		QString colstr;_
 		input >> rowsstr >> colstr;
 		rows_ = rowsstr.toInt();
 		cols_ = colstr.toInt();
 		// set data
 		QString data;
-		ctr = 0;	// counts which item of the line we're at
+		int ctr = 0;	// counts which item of the line we're at
 		QString index; 
-		bool has_formula;
+		bool has_formula = true;
 		while (input >> data) {
 			if (ctr == 0) {	// first item: index
 				index = data;
 				++ctr;
 			}
 			else if (ctr == 1) {	// second item: "=" or ":"
-				if (data == ":")
-					has_formula = false
-				else
-					has_formula = true;
+				if (data == ":")	// indicates that there is no formula
+					has_formula = false;
 				++ctr;
 			}
 			else {	// handle presence/absence formula
