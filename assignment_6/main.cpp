@@ -25,6 +25,9 @@ int main(int argc, char **argv) {
 	merged_trees.print();
 	cout << endl;
 	merged->print();
+	std::swap(tree, tree1);
+	cout << endl;
+	tree1.print();
 
 	// adt::PartHuffTree* merged1 = mergeTrees(merged_trees, tree3);
 	// merged1->print();
